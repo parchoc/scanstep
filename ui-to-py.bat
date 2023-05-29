@@ -1,0 +1,1 @@
+C:\Users\kostr\anaconda3\Lib\site-packages\PySide6\uic.exe MainWindow.ui -o ui_mainwindow.py -g python

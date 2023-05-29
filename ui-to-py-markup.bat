@@ -1,0 +1,1 @@
+C:\Users\kostr\anaconda3\Lib\site-packages\PySide6\uic.exe MarkupDialog.ui -o ui_markupdialog.py -g python
