@@ -20,7 +20,8 @@ class MainWindow(QMainWindow):
         # connections
         self.ui.leftLoadButton.clicked.connect(self.loadLeftImage)
         self.ui.rightLoadButton.clicked.connect(self.loadRightImage)
-        self.ui.leftMarkupButton.clicked.connect(self.callMarkupDialog)
+        self.ui.leftMarkupButton.clicked.connect(self.callLeftMarkupDialog)
+        self.ui.rightMarkupButton.clicked.connect(self.callRightMarkupDialog)
 
     @Slot()
     def loadLeftImage(self):
@@ -39,10 +40,26 @@ class MainWindow(QMainWindow):
             self.ui.rightMarkupButton.setEnabled(True)
 
     @Slot()
-    def callMarkupDialog(self):
-        dialog = MarkupDialog(self)
+    def callLeftMarkupDialog(self):
+        dialog = MarkupDialog(self, self.leftScene)
+        dialog.markupDone.connect(self.updateLeftScene)
         dialog.show()
 
+    @Slot()
+    def callRightMarkupDialog(self):
+        dialog = MarkupDialog(self, self.rightScene)
+        dialog.markupDone.connect(self.updateRightScene)
+        dialog.show()
+    
+    @Slot()
+    def updateLeftScene(self, newScene):
+        self.leftScene = newScene
+        self.ui.leftView.setScene(self.leftScene)
+
+    @Slot()
+    def updateRightScene(self, newScene):
+        self.rightScene = newScene
+        self.ui.rightView.setScene(self.rightScene)
 
 
 if __name__ == "__main__":

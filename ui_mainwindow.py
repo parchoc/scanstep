@@ -37,6 +37,7 @@ class Ui_MainWindow(object):
         self.leftView.setObjectName(u"leftView")
         self.leftView.viewport().setProperty("cursor", QCursor(Qt.ArrowCursor))
         self.leftView.setMouseTracking(True)
+        self.leftView.setInteractive(False)
 
         self.verticalLayout_2.addWidget(self.leftView)
 
@@ -77,6 +78,7 @@ class Ui_MainWindow(object):
         self.rightView.setObjectName(u"rightView")
         self.rightView.viewport().setProperty("cursor", QCursor(Qt.ArrowCursor))
         self.rightView.setMouseTracking(True)
+        self.rightView.setInteractive(False)
 
         self.verticalLayout.addWidget(self.rightView)
 
