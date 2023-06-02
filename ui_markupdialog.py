@@ -17,7 +17,7 @@ from PySide6.QtGui import (QBrush, QColor, QConicalGradient, QCursor,
     QPalette, QPixmap, QRadialGradient, QTransform)
 from PySide6.QtWidgets import (QAbstractButton, QApplication, QComboBox, QDialog,
     QDialogButtonBox, QFrame, QGraphicsView, QHBoxLayout,
-    QLabel, QSizePolicy, QTextBrowser, QVBoxLayout,
+    QLabel, QSizePolicy, QTextEdit, QVBoxLayout,
     QWidget)
 
 class Ui_MarkupDialog(object):
@@ -61,15 +61,16 @@ class Ui_MarkupDialog(object):
 
         self.verticalLayout.addWidget(self.exampleLabel)
 
-        self.textBrowser = QTextBrowser(MarkupDialog)
-        self.textBrowser.setObjectName(u"textBrowser")
+        self.parametersDisplay = QTextEdit(MarkupDialog)
+        self.parametersDisplay.setObjectName(u"parametersDisplay")
         sizePolicy1 = QSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
         sizePolicy1.setHorizontalStretch(0)
         sizePolicy1.setVerticalStretch(1)
-        sizePolicy1.setHeightForWidth(self.textBrowser.sizePolicy().hasHeightForWidth())
-        self.textBrowser.setSizePolicy(sizePolicy1)
+        sizePolicy1.setHeightForWidth(self.parametersDisplay.sizePolicy().hasHeightForWidth())
+        self.parametersDisplay.setSizePolicy(sizePolicy1)
+        self.parametersDisplay.setReadOnly(True)
 
-        self.verticalLayout.addWidget(self.textBrowser)
+        self.verticalLayout.addWidget(self.parametersDisplay)
 
 
         self.horizontalLayout.addLayout(self.verticalLayout)
@@ -109,14 +110,14 @@ class Ui_MarkupDialog(object):
         MarkupDialog.setWindowTitle(QCoreApplication.translate("MarkupDialog", u"Dialog", None))
         self.pointsBox.setItemText(0, QCoreApplication.translate("MarkupDialog", u"Y", None))
         self.pointsBox.setItemText(1, QCoreApplication.translate("MarkupDialog", u"X", None))
-        self.pointsBox.setItemText(2, QCoreApplication.translate("MarkupDialog", u"Z", None))
-        self.pointsBox.setItemText(3, QCoreApplication.translate("MarkupDialog", u"J", None))
-        self.pointsBox.setItemText(4, QCoreApplication.translate("MarkupDialog", u"F", None))
+        self.pointsBox.setItemText(2, QCoreApplication.translate("MarkupDialog", u"X'", None))
+        self.pointsBox.setItemText(3, QCoreApplication.translate("MarkupDialog", u"Г", None))
+        self.pointsBox.setItemText(4, QCoreApplication.translate("MarkupDialog", u"З", None))
         self.pointsBox.setItemText(5, QCoreApplication.translate("MarkupDialog", u"B", None))
-        self.pointsBox.setItemText(6, QCoreApplication.translate("MarkupDialog", u"G", None))
+        self.pointsBox.setItemText(6, QCoreApplication.translate("MarkupDialog", u"B'", None))
         self.pointsBox.setItemText(7, QCoreApplication.translate("MarkupDialog", u"A", None))
-        self.pointsBox.setItemText(8, QCoreApplication.translate("MarkupDialog", u"D", None))
-        self.pointsBox.setItemText(9, QCoreApplication.translate("MarkupDialog", u"E", None))
+        self.pointsBox.setItemText(8, QCoreApplication.translate("MarkupDialog", u"E", None))
+        self.pointsBox.setItemText(9, QCoreApplication.translate("MarkupDialog", u"D", None))
         self.pointsBox.setItemText(10, QCoreApplication.translate("MarkupDialog", u"L", None))
         self.pointsBox.setItemText(11, QCoreApplication.translate("MarkupDialog", u"M", None))
         self.pointsBox.setItemText(12, QCoreApplication.translate("MarkupDialog", u"N", None))
