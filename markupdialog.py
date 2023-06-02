@@ -20,6 +20,7 @@ class MarkupDialog(QDialog):
         if points:
             for key, item in points.items():
                 self.points[key] = self.scene.addPoint(item.x(), item.y())
+                self.points[key].setToolTip(key)
         self.ui.markupView.setScene(self.scene)
         # connections
         self.accepted.connect(self.sendScene)
@@ -31,6 +32,12 @@ class MarkupDialog(QDialog):
 
     @Slot(QGraphicsItem)
     def updatePointsDict(self, item):
+        # remove previous point if it exist
+        if self.ui.pointsBox.currentText() in self.points:
+            self.scene.removeItem(self.points[self.ui.pointsBox.currentText()])
+        # add new point to dict
+        item.setToolTip(self.ui.pointsBox.currentText())
         self.points[self.ui.pointsBox.currentText()] = item
+        # go to the next point if it not the last one
         if self.ui.pointsBox.currentIndex() < self.ui.pointsBox.count() - 1:
             self.ui.pointsBox.setCurrentIndex(self.ui.pointsBox.currentIndex() + 1)

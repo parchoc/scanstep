@@ -10,6 +10,9 @@ class InteractiveScene(QGraphicsScene):
         self.circlePen = QPen()
         self.circlePen.setWidth(2)
         self.circleBrush = QBrush(Qt.GlobalColor.red)
+        self.linePen = QPen()
+        self.linePen.setColor(Qt.GlobalColor.red)
+        self.linePen.setWidth(2)
 
     def mousePressEvent(self, event) -> None:
         self.addPoint(event.scenePos().x(), event.scenePos().y())
