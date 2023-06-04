@@ -15,6 +15,7 @@ class MainWindow(QMainWindow):
         self.ui.leftView.setScene(self.leftScene)
         self.leftImage = None
         self.leftPoints = {}
+        self.leftLines = {}
         self.leftParameters = {
             'length': .0,
             'foot width': .0,
@@ -31,6 +32,7 @@ class MainWindow(QMainWindow):
         self.ui.rightView.setScene(self.rightScene)
         self.rightImage = None
         self.rightPoints = {}
+        self.rightLines = {}
         self.rightParameters = {
             'length': .0,
             'foot width': .0,
@@ -72,27 +74,29 @@ class MainWindow(QMainWindow):
 
     @Slot()
     def callLeftMarkupDialog(self):
-        dialog = MarkupDialog(self, self.leftImage, self.leftPoints, self.leftParameters)
+        dialog = MarkupDialog(self, self.leftImage, self.leftPoints, self.leftLines, self.leftParameters)
         dialog.markupDone.connect(self.updateLeftScene)
         dialog.show()
 
     @Slot()
     def callRightMarkupDialog(self):
-        dialog = MarkupDialog(self, self.rightImage, self.rightPoints, self.rightParameters)
+        dialog = MarkupDialog(self, self.rightImage, self.rightPoints, self.rightLines, self.rightParameters)
         dialog.markupDone.connect(self.updateRightScene)
         dialog.show()
     
     @Slot(QGraphicsScene, dict, dict)
-    def updateLeftScene(self, newScene, newPoints, newParameters):
+    def updateLeftScene(self, newScene, newPoints, newLines, newParameters):
         self.leftScene = newScene
         self.leftPoints = newPoints
+        self.leftLines = newLines
         self.ui.leftView.setScene(self.leftScene)
         self.leftParameters = newParameters
 
     @Slot(QGraphicsScene, dict, dict)
-    def updateRightScene(self, newScene, newPoints, newParameters):
+    def updateRightScene(self, newScene, newPoints, newLines, newParameters):
         self.rightScene = newScene
         self.rightPoints = newPoints
+        self.rightLines = newLines
         self.ui.rightView.setScene(self.rightScene)
         self.rightParameters = newParameters
 
