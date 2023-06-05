@@ -8,16 +8,16 @@ CONNECTIONS = {
     'Y': frozenset(('X', "Z", "A", "W")),
     'X': frozenset(("Y",)),
     "Z": frozenset(("Y", "W")),
-    'J': frozenset(("F", "L", "B", "N")),
-    'F': frozenset(("J", "M", "G")),
-    'B': frozenset(("G", "J")),
-    "G": frozenset(("B", "F")),
-    'A': frozenset(("Y",)),
+    'F': frozenset(("H", "B")),
+    'H': frozenset(("G", "M", 'F')),
+    'B': frozenset(("G", "F")),
+    "G": frozenset(("B", "H", 'L')),
+    'A': frozenset(('Y',)),
     'D': frozenset(("E",)),
     'E': frozenset(("D",)),
-    'L': frozenset(("J",)),
-    'M': frozenset(("F",)),
-    'N': frozenset(("J",)),
+    'L': frozenset(("G",)),
+    'M': frozenset(("H",)),
+    'N': frozenset(("G",)),
     'W': frozenset(("Z", "Y")),
 }
 
@@ -95,18 +95,39 @@ class MarkupDialog(QDialog):
 
     @Slot(str)
     def updateParameters(self, updated_point):
-        # check if all points for length computetion exist and related point has been modified
+        # check if all points for computetion exist and related point has been modified
         # length
         if updated_point in {'Y', "X", "Z"} and len({'Y', "X", "Z"}.intersection(self.points)) == 3:
             self.parameters['length'] = self.lengthFoot()
+        # foot width
+        if updated_point in {'H', 'G'} and len({'H', 'G'}.intersection(self.points)) == 2:
+            self.parameters['width foot'] = self.widthFoot()
+        # heel width
+        if updated_point in {'B', 'F'} and len({'B', 'F'}.intersection(self.points)) == 2:
+            self.parameters['width heel'] = self.widthHeel()
+        # angle alpha(BG, GL)
+        if updated_point in {'B', 'G', 'L' } and len({'B', 'G', 'L'}.intersection(self.points)) == 3:
+            self.parameters['alpha'] = self.alpha()
+        # angle beta(HM, FH)
+        if updated_point in {'H', 'M', 'F'} and len({'H', 'M', 'F'}.intersection(self.points)) == 3:
+            self.parameters['beta'] = self.beta()
+        # angle gamma(BG, FH)
+        if updated_point in {'B', 'G', 'F', 'H'} and len({'B', 'G', 'F', 'H'}.intersection(self.points)) == 4:
+            self.parameters['gamma'] = self.gamma()
+        # angle clark(GN, BG)
+        if updated_point in {'G', 'N', 'B'} and len({'G', 'N', 'B'}.intersection(self.points)) == 3:
+            self.parameters['clark'] = self.clark()
+        # w = length/width
+        if updated_point in {'Y', "X", "Z", 'H', 'G'} and len({'Y', "X", "Z", 'H', 'G'}.intersection(self.points)) == 5:
+            self.parameters['w'] = self.w()
 
     @Slot()
     def updateParametersDisplay(self):
         self.ui.parametersDisplay.setPlainText(
             f'''
             Длина стопы: {self.parameters['length']:.2f}
-            Ширина стопы: {self.parameters['foot width']:.2f}
-            Ширина пятки: {self.parameters['heel width']:.2f}
+            Ширина стопы: {self.parameters['width foot']:.2f}
+            Ширина пятки: {self.parameters['width heel']:.2f}
             α: {self.parameters['alpha']:.2f}
             β: {self.parameters['beta']:.2f}
             γ: {self.parameters['gamma']:.2f}
@@ -160,3 +181,28 @@ class MarkupDialog(QDialog):
             else:
                 length = XY.length()
         return length
+    
+    def widthFoot(self):
+        return self.lines['GH'].line().length()
+    
+    def widthHeel(self):
+        return self.lines['BF'].line().length()
+    
+    def alpha(self):
+        angle = self.lines['BG'].line().angleTo(self.lines['GL'].line())
+        return min(angle, 360 - angle)
+    
+    def beta(self):
+        angle = self.lines['HM'].line().angleTo(self.lines['FH'].line())
+        return min(angle, 360 - angle)
+    
+    def gamma(self):
+        angle = self.lines['BG'].line().angleTo(self.lines['FH'].line())
+        return min(angle, 360 - angle)
+    
+    def clark(self):
+        angle = self.lines['GN'].line().angleTo(self.lines['BG'].line())
+        return min(angle, 360 - angle)
+    
+    def w(self):
+        return self.parameters['length'] / self.parameters['width foot']

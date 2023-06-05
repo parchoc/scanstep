@@ -18,8 +18,8 @@ class MainWindow(QMainWindow):
         self.leftLines = {}
         self.leftParameters = {
             'length': .0,
-            'foot width': .0,
-            'heel width': .0,
+            'width foot': .0,
+            'width heel': .0,
             'alpha': .0,
             'beta': .0,
             'gamma': .0,
@@ -35,8 +35,8 @@ class MainWindow(QMainWindow):
         self.rightLines = {}
         self.rightParameters = {
             'length': .0,
-            'foot width': .0,
-            'heel width': .0,
+            'width foot': .0,
+            'width heel': .0,
             'alpha': .0,
             'beta': .0,
             'gamma': .0,
