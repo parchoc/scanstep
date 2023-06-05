@@ -62,9 +62,21 @@ class MarkupDialog(QDialog):
     def sendScene(self):
         self.markupDone.emit(self.scene, self.points, self.lines, self.parameters)
 
+    def glueTo(self, point, line):
+        perpendicular = self.perpendicularTo(point, line)
+        _, intersectionPoint = line.intersects(perpendicular)
+        point.setPos(intersectionPoint)
+
     @Slot(QGraphicsItem)
     def updateGlobal(self, item):
         current_point = self.ui.pointsBox.currentText()
+        # next points should be on lines
+        if current_point == 'A' and 'XY' in self.lines:
+            self.glueTo(item, self.lines['XY'].line())
+        elif current_point == 'D' and 'IK' in self.lines:
+            self.glueTo(item, self.lines['IK'].line())
+        elif current_point == 'E' and 'IK' in self.lines:
+            self.glueTo(item, self.lines['IK'].line())
         self.updatePoint(item, current_point)
         self.updateLines(current_point)
         self.updateParameters(current_point)
@@ -117,7 +129,7 @@ class MarkupDialog(QDialog):
         # angle clark(GN, BG)
         if updated_point in {'G', 'N', 'B'} and len({'G', 'N', 'B'}.intersection(self.points)) == 3:
             self.parameters['clark'] = self.clark()
-        # w = length/width
+        # w = length/foot width
         if updated_point in {'Y', "X", "Z", 'H', 'G'} and len({'Y', "X", "Z", 'H', 'G'}.intersection(self.points)) == 5:
             self.parameters['w'] = self.w()
 
@@ -147,6 +159,12 @@ class MarkupDialog(QDialog):
                 self.points[line[1]].y(), 
                 self.linePen
             )
+        
+    def perpendicularTo(self, point, line):
+        angle = line.normalVector().angle()
+        perpendicular = QLineF(point.pos(), point.pos() + QPointF(5, 5))
+        perpendicular.setAngle(angle)
+        return perpendicular
 
     def lengthFoot(self):
         XY = self.lines['XY'].line()
@@ -164,11 +182,7 @@ class MarkupDialog(QDialog):
                 del self.points['W']
         else:
             # finding perpendicular from Z to XY
-            # normal = XY.normalVector()
-            angle = XY.normalVector().angle()
-            perpendicular = QLineF(self.points['Z'].pos(), self.points['X'].pos())
-            perpendicular.setAngle(angle)
-            # normal.translate(0, self.points['Z'].y() - self.points['X'].y())
+            perpendicular = self.perpendicularTo(self.points['Z'], XY)
             type, intersectionPoint = XY.intersects(perpendicular)
             if type:
                 # adding intersection point to the scene
