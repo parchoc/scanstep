@@ -1,7 +1,7 @@
 from PySide6.QtCore import Slot, Signal, QPointF, Qt, QLineF
 from ui_markupdialog import Ui_MarkupDialog
 from PySide6.QtWidgets import QDialog, QGraphicsItem, QGraphicsScene
-from InteractiveScene import InteractiveScene
+from InteractiveScene import InteractiveScene, PointItem
 from PySide6.QtGui import QBrush, QPen
 
 CONNECTIONS = {
@@ -65,7 +65,7 @@ class MarkupDialog(QDialog):
     def glueTo(self, point, line):
         perpendicular = self.perpendicularTo(point, line)
         _, intersectionPoint = line.intersects(perpendicular)
-        point.setPos(intersectionPoint)
+        point.setPos(intersectionPoint.x(), intersectionPoint.y())
 
     @Slot(QGraphicsItem)
     def updateGlobal(self, item):
@@ -186,8 +186,8 @@ class MarkupDialog(QDialog):
             type, intersectionPoint = XY.intersects(perpendicular)
             if type:
                 # adding intersection point to the scene
-                point = self.scene.addEllipse(0, 0, 6, 6, self.circlePen, self.circleBrush)
-                point.setPos(intersectionPoint.x(), intersectionPoint.y())
+                point = PointItem(intersectionPoint.x(), intersectionPoint.y(), 3, self.circlePen, self.circleBrush)
+                self.scene.addItem(point)
                 self.updatePoint(point, 'W')
                 # adding perpendicular line to the scene
                 self.updateLines('W')
