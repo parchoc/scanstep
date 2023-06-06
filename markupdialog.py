@@ -5,20 +5,22 @@ from InteractiveScene import InteractiveScene, PointItem
 from PySide6.QtGui import QBrush, QPen
 
 CONNECTIONS = {
-    'Y': frozenset(('X', "Z", "A", "W")),
+    'Y': frozenset(('X', "Z", "W")),
     'X': frozenset(("Y",)),
     "Z": frozenset(("Y", "W")),
     'F': frozenset(("H", "B")),
     'H': frozenset(("G", "M", 'F')),
     'B': frozenset(("G", "F")),
     "G": frozenset(("B", "H", 'L')),
-    'A': frozenset(('Y',)),
-    'D': frozenset(("E",)),
-    'E': frozenset(("D",)),
+    'A': frozenset(),
+    'D': frozenset(),
+    'E': frozenset(),
     'L': frozenset(("G",)),
     'M': frozenset(("H",)),
     'N': frozenset(("G",)),
     'W': frozenset(("Z", "Y")),
+    'K': frozenset(('I',)),
+    'I': frozenset(('K',)),
 }
 
 class MarkupDialog(QDialog):
@@ -61,22 +63,24 @@ class MarkupDialog(QDialog):
     @Slot()
     def sendScene(self):
         self.markupDone.emit(self.scene, self.points, self.lines, self.parameters)
-
-    def glueTo(self, point, line):
+    
+    def glueTo(self, point, line_item):
+        line = line_item.line()
         perpendicular = self.perpendicularTo(point, line)
         _, intersectionPoint = line.intersects(perpendicular)
         point.setPos(intersectionPoint.x(), intersectionPoint.y())
+        point.setParentItem(line_item)
 
     @Slot(QGraphicsItem)
     def updateGlobal(self, item):
         current_point = self.ui.pointsBox.currentText()
         # next points should be on lines
         if current_point == 'A' and 'XY' in self.lines:
-            self.glueTo(item, self.lines['XY'].line())
+            self.glueTo(item, self.lines['XY'])
         elif current_point == 'D' and 'IK' in self.lines:
-            self.glueTo(item, self.lines['IK'].line())
+            self.glueTo(item, self.lines['IK'])
         elif current_point == 'E' and 'IK' in self.lines:
-            self.glueTo(item, self.lines['IK'].line())
+            self.glueTo(item, self.lines['IK'])
         self.updatePoint(item, current_point)
         self.updateLines(current_point)
         self.updateParameters(current_point)
@@ -89,7 +93,11 @@ class MarkupDialog(QDialog):
     def updatePoint(self, point, name):
         # remove previous point if it exist
         if name in self.points:
-            self.scene.removeItem(self.points[name])
+            # if point alredy removed by removed perent than just pass
+            try:
+                self.scene.removeItem(self.points[name])
+            except RuntimeError:
+                pass
         # add new point to dict
         point.setToolTip(name)
         point.setZValue(1)
@@ -111,6 +119,9 @@ class MarkupDialog(QDialog):
         # length
         if updated_point in {'Y', "X", "Z"} and len({'Y', "X", "Z"}.intersection(self.points)) == 3:
             self.parameters['length'] = self.lengthFoot()
+        # plot C
+        if updated_point in {'Y', "A"} and len({'Y', "A"}.intersection(self.points)) == 2:
+            self.plotC()
         # foot width
         if updated_point in {'H', 'G'} and len({'H', 'G'}.intersection(self.points)) == 2:
             self.parameters['width foot'] = self.widthFoot()
@@ -159,6 +170,7 @@ class MarkupDialog(QDialog):
                 self.points[line[1]].y(), 
                 self.linePen
             )
+        self.lines[line].setToolTip(line)
         
     def perpendicularTo(self, point, line):
         angle = line.normalVector().angle()
@@ -220,3 +232,8 @@ class MarkupDialog(QDialog):
     
     def w(self):
         return self.parameters['length'] / self.parameters['width foot']
+    
+    def plotC(self):
+        pos = (self.points['A'].pos() + self.points['Y'].pos()) / 2
+        point = PointItem(pos.x(), pos.y(), 3, self.circlePen, self.circleBrush, self.lines['XY'])
+        self.updatePoint(point, 'C')
