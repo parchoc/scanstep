@@ -14,8 +14,6 @@ class MainWindow(QMainWindow):
         self.leftScene = QGraphicsScene(0, 0, 400, 600)
         self.ui.leftView.setScene(self.leftScene)
         self.leftImage = None
-        self.leftPoints = {}
-        self.leftLines = {}
         self.leftParameters = {
             'length': .0,
             'width foot': .0,
@@ -31,8 +29,6 @@ class MainWindow(QMainWindow):
         self.rightScene = QGraphicsScene(0, 0, 400, 600)
         self.ui.rightView.setScene(self.rightScene)
         self.rightImage = None
-        self.rightPoints = {}
-        self.rightLines = {}
         self.rightParameters = {
             'length': .0,
             'width foot': .0,
@@ -74,29 +70,25 @@ class MainWindow(QMainWindow):
 
     @Slot()
     def callLeftMarkupDialog(self):
-        dialog = MarkupDialog(self, self.leftImage, self.leftPoints, self.leftLines, self.leftParameters)
+        dialog = MarkupDialog(self, self.leftScene, self.leftParameters)
         dialog.markupDone.connect(self.updateLeftScene)
         dialog.show()
 
     @Slot()
     def callRightMarkupDialog(self):
-        dialog = MarkupDialog(self, self.rightImage, self.rightPoints, self.rightLines, self.rightParameters)
+        dialog = MarkupDialog(self, self.rightScene, self.rightParameters)
         dialog.markupDone.connect(self.updateRightScene)
         dialog.show()
     
-    @Slot(QGraphicsScene, dict, dict)
-    def updateLeftScene(self, newScene, newPoints, newLines, newParameters):
+    @Slot(QGraphicsScene, dict)
+    def updateLeftScene(self, newScene, newParameters):
         self.leftScene = newScene
-        self.leftPoints = newPoints
-        self.leftLines = newLines
         self.ui.leftView.setScene(self.leftScene)
         self.leftParameters = newParameters
 
-    @Slot(QGraphicsScene, dict, dict)
-    def updateRightScene(self, newScene, newPoints, newLines, newParameters):
+    @Slot(QGraphicsScene, dict)
+    def updateRightScene(self, newScene, newParameters):
         self.rightScene = newScene
-        self.rightPoints = newPoints
-        self.rightLines = newLines
         self.ui.rightView.setScene(self.rightScene)
         self.rightParameters = newParameters
 

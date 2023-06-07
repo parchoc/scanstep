@@ -23,6 +23,9 @@ class PointItem(QGraphicsEllipseItem):
     
     def y(self):
         return super().y() + self.radius
+    
+    def type(self) -> int:
+        return 65537
 
 
 class InteractiveScene(QGraphicsScene):
@@ -41,15 +44,14 @@ class InteractiveScene(QGraphicsScene):
             self.circleBrush = QBrush(Qt.GlobalColor.red)
 
     def mousePressEvent(self, event) -> None:
-        self.addPoint(event.scenePos().x(), event.scenePos().y())
-        # super().mousePressEvent(event)
+        self.addPoint(event.scenePos().x(), event.scenePos().y(), 3)
         event.accept()
     
-    def addPoint(self, x, y, pen=None, brush=None):
+    def addPoint(self, x, y, radius, pen=None, brush=None):
         if pen and brush:
-            item = PointItem(x, y, 3, pen, brush)
+            item = PointItem(x, y, radius, pen, brush)
         else:
-            item = PointItem(x, y, 3, self.circlePen, self.circleBrush)
+            item = PointItem(x, y, radius, self.circlePen, self.circleBrush)
         self.addItem(item)
         self.pointAdded.emit(item)
         return item
