@@ -45,6 +45,7 @@ class MainWindow(QMainWindow):
         self.ui.rightLoadButton.clicked.connect(self.loadRightImage)
         self.ui.leftMarkupButton.clicked.connect(self.callLeftMarkupDialog)
         self.ui.rightMarkupButton.clicked.connect(self.callRightMarkupDialog)
+        self.ui.actionNewProject.triggered.connect(self.newProject)
 
     @Slot()
     def loadLeftImage(self):
@@ -56,6 +57,7 @@ class MainWindow(QMainWindow):
             self.leftImage = QPixmap(fileName).scaled(self.leftScene.width(), self.leftScene.height(), Qt.AspectRatioMode.IgnoreAspectRatio)
             self.leftScene.addPixmap(self.leftImage)
             self.ui.leftMarkupButton.setEnabled(True)
+            self.ui.leftParametersButton.setEnabled(True)
 
     @Slot()
     def loadRightImage(self):
@@ -67,6 +69,7 @@ class MainWindow(QMainWindow):
             self.rightImage = QPixmap(fileName).scaled(self.rightScene.width(), self.rightScene.height(), Qt.AspectRatioMode.IgnoreAspectRatio)
             self.rightScene.addPixmap(self.rightImage)
             self.ui.rightMarkupButton.setEnabled(True)
+            self.ui.rightParametersButton.setEnabled(True)
 
     @Slot()
     def callLeftMarkupDialog(self):
@@ -91,6 +94,43 @@ class MainWindow(QMainWindow):
         self.rightScene = newScene
         self.ui.rightView.setScene(self.rightScene)
         self.rightParameters = newParameters
+
+    @Slot()
+    def newProject(self):
+        # left setup
+        self.leftScene = QGraphicsScene(0, 0, 400, 600)
+        self.ui.leftView.setScene(self.leftScene)
+        self.leftImage = None
+        self.leftParameters = {
+            'length': .0,
+            'width foot': .0,
+            'width heel': .0,
+            'alpha': .0,
+            'beta': .0,
+            'gamma': .0,
+            'clark': .0,
+            'chijin': .0,
+            'w': .0,
+        }
+        self.ui.leftMarkupButton.setEnabled(False)
+        self.ui.leftParametersButton.setEnabled(False)
+        # right setup
+        self.rightScene = QGraphicsScene(0, 0, 400, 600)
+        self.ui.rightView.setScene(self.rightScene)
+        self.rightImage = None
+        self.rightParameters = {
+            'length': .0,
+            'width foot': .0,
+            'width heel': .0,
+            'alpha': .0,
+            'beta': .0,
+            'gamma': .0,
+            'clark': .0,
+            'chijin': .0,
+            'w': .0,
+        }
+        self.ui.rightMarkupButton.setEnabled(False)
+        self.ui.rightParametersButton.setEnabled(False)
 
 
 if __name__ == "__main__":

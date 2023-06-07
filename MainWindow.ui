@@ -51,6 +51,9 @@
         </item>
         <item>
          <widget class="QPushButton" name="leftParametersButton">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
           <property name="text">
            <string>Характеристики</string>
           </property>
@@ -103,6 +106,9 @@
         </item>
         <item>
          <widget class="QPushButton" name="rightParametersButton">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
           <property name="text">
            <string>Характеристики</string>
           </property>
@@ -127,14 +133,17 @@
     <property name="title">
      <string>Файл</string>
     </property>
-    <addaction name="action"/>
+    <addaction name="actionNewProject"/>
    </widget>
    <addaction name="menu"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
-  <action name="action">
+  <action name="actionNewProject">
    <property name="text">
     <string>Новый</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+N</string>
    </property>
   </action>
  </widget>
