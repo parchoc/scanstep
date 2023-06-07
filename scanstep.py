@@ -1,9 +1,10 @@
 import sys
 from PySide6.QtCore import Qt, Slot
 from ui_mainwindow import Ui_MainWindow
-from PySide6.QtWidgets import QApplication, QMainWindow, QFileDialog, QGraphicsScene
+from PySide6.QtWidgets import QApplication, QMainWindow, QFileDialog, QGraphicsScene, QMessageBox
 from PySide6.QtGui import QPixmap
 from markupdialog import MarkupDialog
+from parametersdialog import ParametersDialog
 
 class MainWindow(QMainWindow):
     def __init__(self) -> None:
@@ -46,6 +47,8 @@ class MainWindow(QMainWindow):
         self.ui.leftMarkupButton.clicked.connect(self.callLeftMarkupDialog)
         self.ui.rightMarkupButton.clicked.connect(self.callRightMarkupDialog)
         self.ui.actionNewProject.triggered.connect(self.newProject)
+        self.ui.leftParametersButton.clicked.connect(self.leftParametersMessage)
+        self.ui.rightParametersButton.clicked.connect(self.rightParametersMessage)
 
     @Slot()
     def loadLeftImage(self):
@@ -131,6 +134,18 @@ class MainWindow(QMainWindow):
         }
         self.ui.rightMarkupButton.setEnabled(False)
         self.ui.rightParametersButton.setEnabled(False)
+    
+    @Slot()
+    def leftParametersMessage(self):
+        dialog = ParametersDialog(self.leftParameters, self)
+        dialog.setWindowTitle('Характеристики левой стопы')
+        dialog.show()
+    
+    @Slot()
+    def rightParametersMessage(self):
+        dialog = ParametersDialog(self.rightParameters, self)
+        dialog.setWindowTitle('Характеристики правой стопы')
+        dialog.show()
 
 
 if __name__ == "__main__":
