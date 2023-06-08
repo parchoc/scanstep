@@ -24,7 +24,7 @@ class Ui_MarkupDialog(object):
     def setupUi(self, MarkupDialog):
         if not MarkupDialog.objectName():
             MarkupDialog.setObjectName(u"MarkupDialog")
-        MarkupDialog.resize(659, 534)
+        MarkupDialog.resize(650, 800)
         MarkupDialog.setModal(True)
         self.verticalLayout_2 = QVBoxLayout(MarkupDialog)
         self.verticalLayout_2.setObjectName(u"verticalLayout_2")

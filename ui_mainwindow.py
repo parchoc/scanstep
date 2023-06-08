@@ -24,7 +24,7 @@ class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         if not MainWindow.objectName():
             MainWindow.setObjectName(u"MainWindow")
-        MainWindow.resize(800, 600)
+        MainWindow.resize(800, 800)
         self.actionNewProject = QAction(MainWindow)
         self.actionNewProject.setObjectName(u"actionNewProject")
         self.actionNewProject.setShortcut(QKeySequence.StandardKey.New)
@@ -37,7 +37,6 @@ class Ui_MainWindow(object):
         self.leftView = QGraphicsView(self.centralwidget)
         self.leftView.setObjectName(u"leftView")
         self.leftView.viewport().setProperty("cursor", QCursor(Qt.ArrowCursor))
-        self.leftView.setMouseTracking(True)
         self.leftView.setInteractive(False)
 
         self.verticalLayout_2.addWidget(self.leftView)
@@ -79,7 +78,6 @@ class Ui_MainWindow(object):
         self.rightView = QGraphicsView(self.centralwidget)
         self.rightView.setObjectName(u"rightView")
         self.rightView.viewport().setProperty("cursor", QCursor(Qt.ArrowCursor))
-        self.rightView.setMouseTracking(True)
         self.rightView.setInteractive(False)
 
         self.verticalLayout.addWidget(self.rightView)

@@ -240,10 +240,10 @@ class MarkupDialog(QDialog):
                 length = items['WY'].line().length()
             else:
                 length = XY.length()
-        return length
+        return length / self.parameters['dpmm']
     
     def widthFoot(self, line):
-        return line.length()
+        return line.length() / self.parameters['dpmm']
     
     def angle(self, line_a, line_b):
         angle = line_a.angleTo(line_b)

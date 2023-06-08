@@ -1,8 +1,8 @@
 import sys
 from PySide6.QtCore import Qt, Slot
 from ui_mainwindow import Ui_MainWindow
-from PySide6.QtWidgets import QApplication, QMainWindow, QFileDialog, QGraphicsScene, QMessageBox
-from PySide6.QtGui import QPixmap
+from PySide6.QtWidgets import QApplication, QMainWindow, QFileDialog, QGraphicsScene
+from PySide6.QtGui import QPixmap, QImage
 from markupdialog import MarkupDialog
 from parametersdialog import ParametersDialog
 
@@ -12,9 +12,8 @@ class MainWindow(QMainWindow):
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
         # left setup
-        self.leftScene = QGraphicsScene(0, 0, 400, 600)
+        self.leftScene = QGraphicsScene()
         self.ui.leftView.setScene(self.leftScene)
-        self.leftImage = None
         self.leftParameters = {
             'length': .0,
             'width foot': .0,
@@ -25,11 +24,11 @@ class MainWindow(QMainWindow):
             'clark': .0,
             'chijin': .0,
             'w': .0,
+            'dpmm': 0,
         }
         # right setup
         self.rightScene = QGraphicsScene(0, 0, 400, 600)
         self.ui.rightView.setScene(self.rightScene)
-        self.rightImage = None
         self.rightParameters = {
             'length': .0,
             'width foot': .0,
@@ -40,6 +39,7 @@ class MainWindow(QMainWindow):
             'clark': .0,
             'chijin': .0,
             'w': .0,
+            'dpmm': 0,
         }
         # connections
         self.ui.leftLoadButton.clicked.connect(self.loadLeftImage)
@@ -57,8 +57,10 @@ class MainWindow(QMainWindow):
         '''
         fileName = QFileDialog.getOpenFileName(self, 'Выбор изображения', filter='Файлы изображений (*.png *.jpg *jpeg);;Все файлы (*)')[0]
         if fileName != '':
-            self.leftImage = QPixmap(fileName).scaled(self.leftScene.width(), self.leftScene.height(), Qt.AspectRatioMode.IgnoreAspectRatio)
-            self.leftScene.addPixmap(self.leftImage)
+            pixmap = QPixmap(fileName)
+            self.leftScene.setSceneRect(0, 0, pixmap.width(), pixmap.height())
+            self.leftScene.addPixmap(pixmap)
+            self.leftParameters['dpmm'] = QImage(fileName).dotsPerMeterX() / 1000
             self.ui.leftMarkupButton.setEnabled(True)
             self.ui.leftParametersButton.setEnabled(True)
 
@@ -69,8 +71,10 @@ class MainWindow(QMainWindow):
         '''
         fileName = QFileDialog.getOpenFileName(self, 'Выбор изображения', filter='Файлы изображений (*.png *.jpg *jpeg);;Все файлы (*)')[0]
         if fileName != '':
-            self.rightImage = QPixmap(fileName).scaled(self.rightScene.width(), self.rightScene.height(), Qt.AspectRatioMode.IgnoreAspectRatio)
-            self.rightScene.addPixmap(self.rightImage)
+            pixmap = QPixmap(fileName)
+            self.rightScene.setSceneRect(0, 0, pixmap.width(), pixmap.height())
+            self.rightScene.addPixmap(pixmap)
+            self.rightParameters['dpmm'] = QImage(fileName).dotsPerMeterX() / 1000
             self.ui.rightMarkupButton.setEnabled(True)
             self.ui.rightParametersButton.setEnabled(True)
 
@@ -101,9 +105,8 @@ class MainWindow(QMainWindow):
     @Slot()
     def newProject(self):
         # left setup
-        self.leftScene = QGraphicsScene(0, 0, 400, 600)
+        self.leftScene = QGraphicsScene()
         self.ui.leftView.setScene(self.leftScene)
-        self.leftImage = None
         self.leftParameters = {
             'length': .0,
             'width foot': .0,
@@ -114,13 +117,13 @@ class MainWindow(QMainWindow):
             'clark': .0,
             'chijin': .0,
             'w': .0,
+            'dpmm': 0,
         }
         self.ui.leftMarkupButton.setEnabled(False)
         self.ui.leftParametersButton.setEnabled(False)
         # right setup
-        self.rightScene = QGraphicsScene(0, 0, 400, 600)
+        self.rightScene = QGraphicsScene()
         self.ui.rightView.setScene(self.rightScene)
-        self.rightImage = None
         self.rightParameters = {
             'length': .0,
             'width foot': .0,
@@ -131,6 +134,7 @@ class MainWindow(QMainWindow):
             'clark': .0,
             'chijin': .0,
             'w': .0,
+            'dpmm': 0,
         }
         self.ui.rightMarkupButton.setEnabled(False)
         self.ui.rightParametersButton.setEnabled(False)
