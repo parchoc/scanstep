@@ -137,16 +137,24 @@ class MarkupDialog(QDialog):
         if updated_point in {'Y', "A"} and len({'Y', "A"}.intersection(items)) == 2:
             self.plotC()
             items = self.items()
+        # remove IK if one of dependent points is relocated
+        if updated_point in {'X', 'A', 'Y'} and 'IK' in items:
+            self.scene.removeItem(items['I'])
+            self.scene.removeItem(items['K'])
+            self.scene.removeItem(items['IK'])
+            del items['I']
+            del items['K']
+            del items['IK']
         # plot I
         if updated_point in {'Y', 'A', "B", 'G'} and len({'C', "B", 'G'}.intersection(items)) == 3:
             self.plotI()
             items = self.items()
         # plot K
-        if updated_point in {'Y', 'A', 'C', "F", 'H'} and len({'C', "F", 'H'}.intersection(items)) == 3:
+        if updated_point in {'Y', 'A', "F", 'H'} and len({'C', "F", 'H'}.intersection(items)) == 3:
             self.plotK()
             items = self.items()
         # plot IK
-        if updated_point in {'Y', 'A', 'C', "F", 'H', 'B', 'G'} and len({'I', "K"}.intersection(items)) == 2:
+        if updated_point in {'Y', 'A', "F", 'H', 'B', 'G'} and len({'I', "K"}.intersection(items)) == 2:
             self.addLine('IK')
             items = self.items()
         # foot width
