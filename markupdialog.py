@@ -43,9 +43,11 @@ class MarkupDialog(QDialog):
         self.circlePen = QPen()
         self.circlePen.setWidth(2)
         self.circleBrush = QBrush(Qt.GlobalColor.red)
+        self.hightlightBrush = QBrush(Qt.GlobalColor.blue)
         self.linePen = QPen()
         self.linePen.setColor(Qt.GlobalColor.red)
         self.linePen.setWidth(1)
+        self.prevPoint = self.ui.pointsBox.currentText()
         if parameters:
             self.parameters = parameters
         else:
@@ -70,13 +72,19 @@ class MarkupDialog(QDialog):
         for point, line in PARENTS.items():
             if point in items and line in items:
                 items[point].setParentItem(items[line])
+        self.hightlightPoint()
         self.ui.markupView.setScene(self.scene)
         # connections
         self.accepted.connect(self.sendScene)
         self.scene.pointAdded.connect(self.updateGlobal)
+        self.ui.pointsBox.currentIndexChanged.connect(self.hightlightPoint)
 
     @Slot()
     def sendScene(self):
+        # recolor hightlighted point before sending scene
+        items = self.items()
+        if self.prevPoint in items:
+            items[self.prevPoint].setBrush(self.circleBrush)
         self.markupDone.emit(self.scene, self.parameters)
     
     def glueTo(self, point, line_item):
@@ -287,3 +295,13 @@ class MarkupDialog(QDialog):
         for item in self.scene.items():
             items[item.toolTip()] = item
         return items
+    
+    @Slot()
+    def hightlightPoint(self):
+        current_text = self.ui.pointsBox.currentText()
+        items = self.items()
+        if self.prevPoint in items:
+            items[self.prevPoint].setBrush(self.circleBrush)
+        if current_text in items:
+            items[current_text].setBrush(self.hightlightBrush)
+        self.prevPoint = current_text
