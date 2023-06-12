@@ -50,6 +50,7 @@ class MainWindow(QMainWindow):
         self.ui.leftParametersButton.clicked.connect(self.leftParametersMessage)
         self.ui.rightParametersButton.clicked.connect(self.rightParametersMessage)
         self.ui.actionSaveLeft.triggered.connect(self.saveLeftScene)
+        self.ui.actionSaveRight.triggered.connect(self.saveRightScene)
 
     @Slot()
     def loadLeftImage(self):
@@ -79,6 +80,7 @@ class MainWindow(QMainWindow):
             self.rightParameters['dpmm'] = QImage(fileName).dotsPerMeterX() / 1000
             self.ui.rightMarkupButton.setEnabled(True)
             self.ui.rightParametersButton.setEnabled(True)
+            self.ui.actionSaveRight.setEnabled(True)
 
     @Slot()
     def callLeftMarkupDialog(self):
@@ -141,6 +143,7 @@ class MainWindow(QMainWindow):
         }
         self.ui.rightMarkupButton.setEnabled(False)
         self.ui.rightParametersButton.setEnabled(False)
+        self.ui.actionSaveRight.setEnabled(False)
     
     @Slot()
     def leftParametersMessage(self):
@@ -153,17 +156,24 @@ class MainWindow(QMainWindow):
         dialog = ParametersDialog(self.rightParameters, self)
         dialog.setWindowTitle('Характеристики правой стопы')
         dialog.show()
+    
+    def saveScene(self, scene):
+        filename, format = QFileDialog.getSaveFileName(self, 'Сохранение изображения', filter='JPEG (*.jpeg);;PNG (*.png)')
+        if filename != '':
+            image = QImage(scene.sceneRect().size().toSize(), QImage.Format.Format_ARGB32)
+            image.fill(Qt.GlobalColor.transparent)
+            painter = QPainter(image)
+            scene.render(painter)
+            painter.end()
+            image.save(filename, format.split(' ', 1)[0])
 
     @Slot()
     def saveLeftScene(self):
-        filename, format = QFileDialog.getSaveFileName(self, 'Сохранение изображения', filter='PNG (*.png);;JPEG (*.jpeg)')
-        if filename != '':
-            image = QImage(self.leftScene.sceneRect().size().toSize(), QImage.Format.Format_ARGB32)
-            image.fill(Qt.GlobalColor.transparent)
-            painter = QPainter(image)
-            self.leftScene.render(painter)
-            painter.end()
-            image.save(filename, format.split(' ', 1)[0])
+        self.saveScene(self.leftScene)
+    
+    @Slot()
+    def saveRightScene(self):
+        self.saveScene(self.rightScene)
                 
 
 if __name__ == "__main__":
