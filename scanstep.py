@@ -59,6 +59,11 @@ class MainWindow(QMainWindow):
         fileName = QFileDialog.getOpenFileName(self, 'Выбор изображения', filter='Файлы изображений (*.png *.jpg *jpeg);;Все файлы (*)')[0]
         if fileName != '':
             self.leftPixmap = QPixmap(fileName)
+            if self.leftPixmap.isNull():
+                box = QMessageBox(QMessageBox.Icon.Warning, 'Ошибка загрузки', 'Невозможно загрузить файл', parent=self)
+                box.show()
+                self.leftPixmap = None
+                return
             self.leftScene.setSceneRect(0, 0, self.leftPixmap.width(), self.leftPixmap.height())
             self.leftScene.addPixmap(self.leftPixmap)
             self.leftParameters = PARAMETERS.copy()
@@ -74,6 +79,11 @@ class MainWindow(QMainWindow):
         fileName = QFileDialog.getOpenFileName(self, 'Выбор изображения', filter='Файлы изображений (*.png *.jpg *jpeg);;Все файлы (*)')[0]
         if fileName != '':
             self.rightPixmap = QPixmap(fileName)
+            if self.rightPixmap.isNull():
+                box = QMessageBox(QMessageBox.Icon.Warning, 'Ошибка загрузки', 'Невозможно загрузить файл', parent=self)
+                box.show()
+                self.rightPixmap = None
+                return
             self.rightScene.setSceneRect(0, 0, self.rightPixmap.width(), self.rightPixmap.height())
             self.rightScene.addPixmap(self.rightPixmap)
             self.rightParameters = PARAMETERS.copy()
@@ -139,7 +149,11 @@ class MainWindow(QMainWindow):
             painter = QPainter(image)
             scene.render(painter)
             painter.end()
-            image.save(filename, format.split(' ', 1)[0])
+            try:
+                image.save(filename, format.split(' ', 1)[0])
+            except OSError:
+                box = QMessageBox(QMessageBox.Icon.Warning, 'Ошибка сохранения', 'Невозможно сохранить файл', parent=self)
+                box.show()
 
     @Slot()
     def saveLeftScene(self):
@@ -186,16 +200,20 @@ class MainWindow(QMainWindow):
                 right_bytes = self.pixmapToBytes(self.rightPixmap)
             save_dict['right']['parameters'] = self.rightParameters
             # write resulted data to zip archive
-            with ZipFile(filename, 'w') as savefile:
-                timetuple = datetime.now().timetuple()
-                # left pixmap
-                if self.leftPixmap:
-                    savefile.writestr(ZipInfo('left.png', timetuple), left_bytes)
-                # right pixmap
-                if self.rightPixmap:
-                    savefile.writestr(ZipInfo('right.png', timetuple), right_bytes)
-                # dictinary
-                savefile.writestr(ZipInfo('items.json', timetuple), json.dumps(save_dict))
+            try:
+                with ZipFile(filename, 'w') as savefile:
+                    timetuple = datetime.now().timetuple()
+                    # left pixmap
+                    if self.leftPixmap:
+                        savefile.writestr(ZipInfo('left.png', timetuple), left_bytes)
+                    # right pixmap
+                    if self.rightPixmap:
+                        savefile.writestr(ZipInfo('right.png', timetuple), right_bytes)
+                    # dictinary
+                    savefile.writestr(ZipInfo('items.json', timetuple), json.dumps(save_dict))
+            except OSError:
+                box = QMessageBox(QMessageBox.Icon.Warning, 'Ошибка сохранения', 'Невозможно сохранить проект', parent=self)
+                box.show()
 
     def saveItems(self, scene):
         save_dict = {
