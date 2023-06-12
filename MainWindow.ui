@@ -13,6 +13,10 @@
   <property name="windowTitle">
    <string>ScanStep</string>
   </property>
+  <property name="windowIcon">
+   <iconset resource="res.qrc">
+    <normaloff>:/img/icon.png</normaloff>:/img/icon.png</iconset>
+  </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QHBoxLayout" name="horizontalLayout_3">
     <item>
@@ -134,6 +138,9 @@
      <string>Файл</string>
     </property>
     <addaction name="actionNewProject"/>
+    <addaction name="actionSaveLeft"/>
+    <addaction name="actionSaveRight"/>
+    <addaction name="actionQuit"/>
    </widget>
    <addaction name="menu"/>
   </widget>
@@ -146,9 +153,47 @@
     <string>Ctrl+N</string>
    </property>
   </action>
+  <action name="actionSaveLeft">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>Сохранить левое изображение</string>
+   </property>
+  </action>
+  <action name="actionSaveRight">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>Сохранить правое изображение</string>
+   </property>
+  </action>
+  <action name="actionQuit">
+   <property name="text">
+    <string>Выход</string>
+   </property>
+  </action>
  </widget>
  <resources>
   <include location="res.qrc"/>
  </resources>
- <connections/>
+ <connections>
+  <connection>
+   <sender>actionQuit</sender>
+   <signal>triggered()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>close()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>399</x>
+     <y>399</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
 </ui>

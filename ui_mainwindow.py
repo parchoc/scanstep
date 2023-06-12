@@ -26,10 +26,19 @@ class Ui_MainWindow(object):
         if not MainWindow.objectName():
             MainWindow.setObjectName(u"MainWindow")
         MainWindow.resize(800, 800)
-        MainWindow.setWindowIcon(QIcon(':/img/icon.png'))
+        icon = QIcon()
+        icon.addFile(u":/img/icon.png", QSize(), QIcon.Normal, QIcon.Off)
+        MainWindow.setWindowIcon(icon)
         self.actionNewProject = QAction(MainWindow)
         self.actionNewProject.setObjectName(u"actionNewProject")
-        self.actionNewProject.setShortcut(QKeySequence.StandardKey.New)
+        self.actionSaveLeft = QAction(MainWindow)
+        self.actionSaveLeft.setObjectName(u"actionSaveLeft")
+        self.actionSaveLeft.setEnabled(False)
+        self.actionSaveRight = QAction(MainWindow)
+        self.actionSaveRight.setObjectName(u"actionSaveRight")
+        self.actionSaveRight.setEnabled(False)
+        self.actionQuit = QAction(MainWindow)
+        self.actionQuit.setObjectName(u"actionQuit")
         self.centralwidget = QWidget(MainWindow)
         self.centralwidget.setObjectName(u"centralwidget")
         self.horizontalLayout_3 = QHBoxLayout(self.centralwidget)
@@ -39,6 +48,7 @@ class Ui_MainWindow(object):
         self.leftView = QGraphicsView(self.centralwidget)
         self.leftView.setObjectName(u"leftView")
         self.leftView.viewport().setProperty("cursor", QCursor(Qt.ArrowCursor))
+        self.leftView.setMouseTracking(False)
         self.leftView.setInteractive(False)
 
         self.verticalLayout_2.addWidget(self.leftView)
@@ -80,6 +90,7 @@ class Ui_MainWindow(object):
         self.rightView = QGraphicsView(self.centralwidget)
         self.rightView.setObjectName(u"rightView")
         self.rightView.viewport().setProperty("cursor", QCursor(Qt.ArrowCursor))
+        self.rightView.setMouseTracking(False)
         self.rightView.setInteractive(False)
 
         self.verticalLayout.addWidget(self.rightView)
@@ -122,8 +133,12 @@ class Ui_MainWindow(object):
 
         self.menubar.addAction(self.menu.menuAction())
         self.menu.addAction(self.actionNewProject)
+        self.menu.addAction(self.actionSaveLeft)
+        self.menu.addAction(self.actionSaveRight)
+        self.menu.addAction(self.actionQuit)
 
         self.retranslateUi(MainWindow)
+        self.actionQuit.triggered.connect(MainWindow.close)
 
         QMetaObject.connectSlotsByName(MainWindow)
     # setupUi
@@ -131,6 +146,12 @@ class Ui_MainWindow(object):
     def retranslateUi(self, MainWindow):
         MainWindow.setWindowTitle(QCoreApplication.translate("MainWindow", u"ScanStep", None))
         self.actionNewProject.setText(QCoreApplication.translate("MainWindow", u"\u041d\u043e\u0432\u044b\u0439", None))
+#if QT_CONFIG(shortcut)
+        self.actionNewProject.setShortcut(QCoreApplication.translate("MainWindow", u"Ctrl+N", None))
+#endif // QT_CONFIG(shortcut)
+        self.actionSaveLeft.setText(QCoreApplication.translate("MainWindow", u"\u0421\u043e\u0445\u0440\u0430\u043d\u0438\u0442\u044c \u043b\u0435\u0432\u043e\u0435 \u0438\u0437\u043e\u0431\u0440\u0430\u0436\u0435\u043d\u0438\u0435", None))
+        self.actionSaveRight.setText(QCoreApplication.translate("MainWindow", u"\u0421\u043e\u0445\u0440\u0430\u043d\u0438\u0442\u044c \u043f\u0440\u0430\u0432\u043e\u0435 \u0438\u0437\u043e\u0431\u0440\u0430\u0436\u0435\u043d\u0438\u0435", None))
+        self.actionQuit.setText(QCoreApplication.translate("MainWindow", u"\u0412\u044b\u0445\u043e\u0434", None))
         self.leftLoadButton.setText(QCoreApplication.translate("MainWindow", u"\u0417\u0430\u0433\u0440\u0443\u0437\u0438\u0442\u044c", None))
         self.leftMarkupButton.setText(QCoreApplication.translate("MainWindow", u"\u0420\u0430\u0437\u043c\u0435\u0442\u0438\u0442\u044c", None))
         self.leftParametersButton.setText(QCoreApplication.translate("MainWindow", u"\u0425\u0430\u0440\u0430\u043a\u0442\u0435\u0440\u0438\u0441\u0442\u0438\u043a\u0438", None))

@@ -2,7 +2,7 @@ import sys
 from PySide6.QtCore import Qt, Slot
 from ui_mainwindow import Ui_MainWindow
 from PySide6.QtWidgets import QApplication, QMainWindow, QFileDialog, QGraphicsScene
-from PySide6.QtGui import QPixmap, QImage
+from PySide6.QtGui import QPixmap, QImage, QPainter
 from markupdialog import MarkupDialog
 from parametersdialog import ParametersDialog
 
@@ -49,6 +49,7 @@ class MainWindow(QMainWindow):
         self.ui.actionNewProject.triggered.connect(self.newProject)
         self.ui.leftParametersButton.clicked.connect(self.leftParametersMessage)
         self.ui.rightParametersButton.clicked.connect(self.rightParametersMessage)
+        self.ui.actionSaveLeft.triggered.connect(self.saveLeftScene)
 
     @Slot()
     def loadLeftImage(self):
@@ -63,6 +64,7 @@ class MainWindow(QMainWindow):
             self.leftParameters['dpmm'] = QImage(fileName).dotsPerMeterX() / 1000
             self.ui.leftMarkupButton.setEnabled(True)
             self.ui.leftParametersButton.setEnabled(True)
+            self.ui.actionSaveLeft.setEnabled(True)
 
     @Slot()
     def loadRightImage(self):
@@ -121,6 +123,7 @@ class MainWindow(QMainWindow):
         }
         self.ui.leftMarkupButton.setEnabled(False)
         self.ui.leftParametersButton.setEnabled(False)
+        self.ui.actionSaveLeft.setEnabled(False)
         # right setup
         self.rightScene = QGraphicsScene()
         self.ui.rightView.setScene(self.rightScene)
@@ -151,6 +154,17 @@ class MainWindow(QMainWindow):
         dialog.setWindowTitle('Характеристики правой стопы')
         dialog.show()
 
+    @Slot()
+    def saveLeftScene(self):
+        filename, format = QFileDialog.getSaveFileName(self, 'Сохранение изображения', filter='PNG (*.png);;JPEG (*.jpeg)')
+        if filename != '':
+            image = QImage(self.leftScene.sceneRect().size().toSize(), QImage.Format.Format_ARGB32)
+            image.fill(Qt.GlobalColor.transparent)
+            painter = QPainter(image)
+            self.leftScene.render(painter)
+            painter.end()
+            image.save(filename, format.split(' ', 1)[0])
+                
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
