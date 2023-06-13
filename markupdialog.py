@@ -2,7 +2,8 @@ from PySide6.QtCore import Slot, Signal, QPointF, Qt, QLineF
 from ui_markupdialog import Ui_MarkupDialog
 from PySide6.QtWidgets import QDialog, QGraphicsItem, QGraphicsScene
 from InteractiveScene import InteractiveScene, PointItem
-from PySide6.QtGui import QBrush, QPen
+from PySide6.QtGui import QBrush, QPen, QPixmap
+import res
 
 CONNECTIONS = {
     'Y': frozenset(('X', "Z", "W")),
@@ -30,6 +31,24 @@ PARENTS = {
     'E': 'IK',
     'I': 'BG',
     'K': 'FH',
+}
+
+SCHEME = {
+    'Y': (171, 502),
+    'X': (136, 25),
+    "Z": (189, 21),
+    'F': (84, 425),
+    'H': (22, 195),
+    'B': (235, 433),
+    "G": (246, 148),
+    'A': (141, 86),
+    # 'D': (),
+    'E': (127, 295),
+    'L': (232, 66),
+    'M': (27, 131),
+    'N': (139, 207),
+    'K': (49, 296),
+    'I': (240, 291),
 }
 
 class MarkupDialog(QDialog):
@@ -72,8 +91,16 @@ class MarkupDialog(QDialog):
         for point, line in PARENTS.items():
             if point in items and line in items:
                 items[point].setParentItem(items[line])
-        self.hightlightPoint()
         self.ui.markupView.setScene(self.scene)
+        # scheme
+        scheme = QPixmap(u":/img/foot_sheme.jpg")
+        self.schemeScene = InteractiveScene(scheme.width(), scheme.height())
+        self.schemeScene.addPixmap(scheme)
+        for name, pos in SCHEME.items():
+            item = self.schemeScene.addPoint(pos[0], pos[1], 4)
+            item.setToolTip(name)
+        self.ui.schemeView.setScene(self.schemeScene)
+        self.hightlightPoint()
         # connections
         self.accepted.connect(self.sendScene)
         self.scene.pointAdded.connect(self.updateGlobal)
@@ -82,7 +109,7 @@ class MarkupDialog(QDialog):
     @Slot()
     def sendScene(self):
         # recolor hightlighted point before sending scene
-        items = self.items()
+        items = self.scene.itemsDict()
         if self.prevPoint in items:
             items[self.prevPoint].setBrush(self.circleBrush)
         self.markupDone.emit(self.scene, self.parameters)
@@ -97,7 +124,7 @@ class MarkupDialog(QDialog):
     @Slot(QGraphicsItem)
     def updateGlobal(self, item):
         current_point = self.ui.pointsBox.currentText()
-        items = self.items()
+        items = self.scene.itemsDict()
         # next points should be on lines
         if current_point == 'A' and 'XY' in items:
             self.glueTo(item, items['XY'])
@@ -116,7 +143,7 @@ class MarkupDialog(QDialog):
     @Slot(QGraphicsItem, str)
     def updatePoint(self, point, name):
         # remove previous point if it exist
-        items = self.items()
+        items = self.scene.itemsDict()
         if name in items:
             self.scene.removeItem(items[name])
         # add new point to dict
@@ -125,7 +152,7 @@ class MarkupDialog(QDialog):
     
     @Slot(str)
     def updateLines(self, updated_point):
-        items = self.items()
+        items = self.scene.itemsDict()
         # go thro all points connected to updated_point
         for point in CONNECTIONS[updated_point]:
             # if connected point exists than build line
@@ -136,7 +163,7 @@ class MarkupDialog(QDialog):
 
     @Slot(str)
     def updateParameters(self, updated_point):
-        items = self.items()
+        items = self.scene.itemsDict()
         # check if all points for computetion exist and related point has been modified
         # length
         if updated_point in {'Y', "X", "Z"} and len({'Y', "X", "Z"}.intersection(items)) == 3:
@@ -144,7 +171,7 @@ class MarkupDialog(QDialog):
         # plot C
         if updated_point in {'Y', "A"} and len({'Y', "A"}.intersection(items)) == 2:
             self.plotC()
-            items = self.items()
+            items = self.scene.itemsDict()
         # remove IK if one of dependent points is relocated
         if updated_point in {'X', 'A', 'Y'} and 'IK' in items:
             self.scene.removeItem(items['I'])
@@ -156,15 +183,15 @@ class MarkupDialog(QDialog):
         # plot I
         if updated_point in {'Y', 'A', "B", 'G'} and len({'C', "B", 'G'}.intersection(items)) == 3:
             self.plotI()
-            items = self.items()
+            items = self.scene.itemsDict()
         # plot K
         if updated_point in {'Y', 'A', "F", 'H'} and len({'C', "F", 'H'}.intersection(items)) == 3:
             self.plotK()
-            items = self.items()
+            items = self.scene.itemsDict()
         # plot IK
         if updated_point in {'Y', 'A', "F", 'H', 'B', 'G'} and len({'I', "K"}.intersection(items)) == 2:
             self.addLine('IK')
-            items = self.items()
+            items = self.scene.itemsDict()
         # foot width
         if updated_point in {'H', 'G'} and len({'H', 'G'}.intersection(items)) == 2:
             self.parameters['width foot'] = self.widthFoot(items['GH'].line())
@@ -207,7 +234,7 @@ class MarkupDialog(QDialog):
         )
 
     def addLine(self, line):
-        items = self.items()
+        items = self.scene.itemsDict()
         if line in items:
             self.scene.removeItem(items[line])
         items[line] = self.scene.addLine(
@@ -227,7 +254,7 @@ class MarkupDialog(QDialog):
         return perpendicular
 
     def lengthFoot(self):
-        items = self.items()
+        items = self.scene.itemsDict()
         XY = items['XY'].line()
         # checking which line is longer
         if XY.length() > items["YZ"].line().length():
@@ -252,7 +279,7 @@ class MarkupDialog(QDialog):
                 self.updatePoint(point, 'W')
                 # adding perpendicular line to the scene
                 self.updateLines('W')
-                items = self.items()
+                items = self.scene.itemsDict()
                 length = items['WY'].line().length()
             else:
                 length = XY.length()
@@ -269,13 +296,13 @@ class MarkupDialog(QDialog):
         return self.parameters['length'] / self.parameters['width foot']
     
     def plotC(self):
-        items = self.items()
+        items = self.scene.itemsDict()
         pos = (items['A'].pos() + items['Y'].pos()) / 2
         point = PointItem(pos.x(), pos.y(), 3, self.circlePen, self.circleBrush, items['XY'])
         self.updatePoint(point, 'C')
 
     def plotK(self):
-        items = self.items()
+        items = self.scene.itemsDict()
         perpendicular = self.perpendicularTo(items['C'], items['XY'].line())
         inter_type, intersectionPoint = items['FH'].line().intersects(perpendicular)
         if inter_type:
@@ -283,25 +310,26 @@ class MarkupDialog(QDialog):
             self.updatePoint(point, 'K')
 
     def plotI(self):
-        items = self.items()
+        items = self.scene.itemsDict()
         perpendicular = self.perpendicularTo(items['C'], items['XY'].line())
         inter_type, intersectionPoint = items['BG'].line().intersects(perpendicular)
         if inter_type:
             point = PointItem(intersectionPoint.x(), intersectionPoint.y(), 3, self.circlePen, self.circleBrush, items['BG'])
             self.updatePoint(point, 'I')
-
-    def items(self):
-        items = {}
-        for item in self.scene.items():
-            items[item.toolTip()] = item
-        return items
     
     @Slot()
     def hightlightPoint(self):
         current_text = self.ui.pointsBox.currentText()
-        items = self.items()
+        items = self.scene.itemsDict()
         if self.prevPoint in items:
             items[self.prevPoint].setBrush(self.circleBrush)
         if current_text in items:
             items[current_text].setBrush(self.hightlightBrush)
+        self.hightlightScheme()
         self.prevPoint = current_text
+    
+    @Slot()
+    def hightlightScheme(self):
+        items = self.schemeScene.itemsDict()
+        items[self.prevPoint].setBrush(self.circleBrush)
+        items[self.ui.pointsBox.currentText()].setBrush(self.hightlightBrush)

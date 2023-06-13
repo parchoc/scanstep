@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>659</width>
-    <height>534</height>
+    <width>800</width>
+    <height>800</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -36,12 +36,12 @@
      </item>
      <item>
       <property name="text">
-       <string>J</string>
+       <string>G</string>
       </property>
      </item>
      <item>
       <property name="text">
-       <string>F</string>
+       <string>H</string>
       </property>
      </item>
      <item>
@@ -51,7 +51,7 @@
      </item>
      <item>
       <property name="text">
-       <string>G</string>
+       <string>F</string>
       </property>
      </item>
      <item>
@@ -91,18 +91,15 @@
      <item>
       <layout class="QVBoxLayout" name="verticalLayout">
        <item>
-        <widget class="QLabel" name="exampleLabel">
+        <widget class="QGraphicsView" name="schemeView">
          <property name="sizePolicy">
           <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
            <horstretch>0</horstretch>
-           <verstretch>2</verstretch>
+           <verstretch>1</verstretch>
           </sizepolicy>
          </property>
-         <property name="autoFillBackground">
+         <property name="interactive">
           <bool>false</bool>
-         </property>
-         <property name="text">
-          <string/>
          </property>
         </widget>
        </item>
@@ -111,7 +108,7 @@
          <property name="sizePolicy">
           <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
            <horstretch>0</horstretch>
-           <verstretch>1</verstretch>
+           <verstretch>0</verstretch>
           </sizepolicy>
          </property>
          <property name="readOnly">
@@ -130,6 +127,12 @@
      </item>
      <item>
       <widget class="QGraphicsView" name="markupView">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+         <horstretch>1</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
        <property name="cursor" stdset="0">
         <cursorShape>CrossCursor</cursorShape>
        </property>

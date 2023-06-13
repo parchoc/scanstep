@@ -17,14 +17,13 @@ from PySide6.QtGui import (QBrush, QColor, QConicalGradient, QCursor,
     QPalette, QPixmap, QRadialGradient, QTransform)
 from PySide6.QtWidgets import (QAbstractButton, QApplication, QComboBox, QDialog,
     QDialogButtonBox, QFrame, QGraphicsView, QHBoxLayout,
-    QLabel, QSizePolicy, QTextEdit, QVBoxLayout,
-    QWidget)
+    QSizePolicy, QTextEdit, QVBoxLayout, QWidget)
 
 class Ui_MarkupDialog(object):
     def setupUi(self, MarkupDialog):
         if not MarkupDialog.objectName():
             MarkupDialog.setObjectName(u"MarkupDialog")
-        MarkupDialog.resize(650, 800)
+        MarkupDialog.resize(800, 800)
         MarkupDialog.setModal(True)
         self.verticalLayout_2 = QVBoxLayout(MarkupDialog)
         self.verticalLayout_2.setObjectName(u"verticalLayout_2")
@@ -50,22 +49,22 @@ class Ui_MarkupDialog(object):
         self.horizontalLayout.setObjectName(u"horizontalLayout")
         self.verticalLayout = QVBoxLayout()
         self.verticalLayout.setObjectName(u"verticalLayout")
-        self.exampleLabel = QLabel(MarkupDialog)
-        self.exampleLabel.setObjectName(u"exampleLabel")
+        self.schemeView = QGraphicsView(MarkupDialog)
+        self.schemeView.setObjectName(u"schemeView")
         sizePolicy = QSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
         sizePolicy.setHorizontalStretch(0)
-        sizePolicy.setVerticalStretch(2)
-        sizePolicy.setHeightForWidth(self.exampleLabel.sizePolicy().hasHeightForWidth())
-        self.exampleLabel.setSizePolicy(sizePolicy)
-        self.exampleLabel.setAutoFillBackground(False)
+        sizePolicy.setVerticalStretch(1)
+        sizePolicy.setHeightForWidth(self.schemeView.sizePolicy().hasHeightForWidth())
+        self.schemeView.setSizePolicy(sizePolicy)
+        self.schemeView.setInteractive(False)
 
-        self.verticalLayout.addWidget(self.exampleLabel)
+        self.verticalLayout.addWidget(self.schemeView)
 
         self.parametersDisplay = QTextEdit(MarkupDialog)
         self.parametersDisplay.setObjectName(u"parametersDisplay")
         sizePolicy1 = QSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
         sizePolicy1.setHorizontalStretch(0)
-        sizePolicy1.setVerticalStretch(1)
+        sizePolicy1.setVerticalStretch(0)
         sizePolicy1.setHeightForWidth(self.parametersDisplay.sizePolicy().hasHeightForWidth())
         self.parametersDisplay.setSizePolicy(sizePolicy1)
         self.parametersDisplay.setReadOnly(True)
@@ -84,6 +83,11 @@ class Ui_MarkupDialog(object):
 
         self.markupView = QGraphicsView(MarkupDialog)
         self.markupView.setObjectName(u"markupView")
+        sizePolicy2 = QSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+        sizePolicy2.setHorizontalStretch(1)
+        sizePolicy2.setVerticalStretch(0)
+        sizePolicy2.setHeightForWidth(self.markupView.sizePolicy().hasHeightForWidth())
+        self.markupView.setSizePolicy(sizePolicy2)
         self.markupView.viewport().setProperty("cursor", QCursor(Qt.CrossCursor))
 
         self.horizontalLayout.addWidget(self.markupView)
@@ -116,12 +120,11 @@ class Ui_MarkupDialog(object):
         self.pointsBox.setItemText(5, QCoreApplication.translate("MarkupDialog", u"B", None))
         self.pointsBox.setItemText(6, QCoreApplication.translate("MarkupDialog", u"F", None))
         self.pointsBox.setItemText(7, QCoreApplication.translate("MarkupDialog", u"A", None))
-        self.pointsBox.setItemText(8, QCoreApplication.translate("MarkupDialog", u"E", None))
-        self.pointsBox.setItemText(9, QCoreApplication.translate("MarkupDialog", u"D", None))
+        self.pointsBox.setItemText(8, QCoreApplication.translate("MarkupDialog", u"D", None))
+        self.pointsBox.setItemText(9, QCoreApplication.translate("MarkupDialog", u"E", None))
         self.pointsBox.setItemText(10, QCoreApplication.translate("MarkupDialog", u"L", None))
         self.pointsBox.setItemText(11, QCoreApplication.translate("MarkupDialog", u"M", None))
         self.pointsBox.setItemText(12, QCoreApplication.translate("MarkupDialog", u"N", None))
 
-        self.exampleLabel.setText("")
     # retranslateUi
 

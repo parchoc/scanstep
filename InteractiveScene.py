@@ -55,3 +55,9 @@ class InteractiveScene(QGraphicsScene):
         self.addItem(item)
         self.pointAdded.emit(item)
         return item
+    
+    def itemsDict(self):
+        items = {}
+        for item in self.items():
+            items[item.toolTip()] = item
+        return items
