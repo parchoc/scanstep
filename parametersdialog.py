@@ -1,5 +1,6 @@
-from ui_parametersdialog import Ui_ParametersDialog
 from PySide6.QtWidgets import QDialog
+
+from ui_parametersdialog import Ui_ParametersDialog
 
 
 class ParametersDialog(QDialog):

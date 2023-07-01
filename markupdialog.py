@@ -1,8 +1,9 @@
 from PySide6.QtCore import Slot, Signal, QPointF, Qt, QLineF
-from ui_markupdialog import Ui_MarkupDialog
 from PySide6.QtWidgets import QDialog, QGraphicsItem, QGraphicsScene
 from InteractiveScene import InteractiveScene, PointItem
 from PySide6.QtGui import QBrush, QPen, QPixmap
+
+from ui_markupdialog import Ui_MarkupDialog
 import res
 
 CONNECTIONS = {

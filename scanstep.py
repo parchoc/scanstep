@@ -1,15 +1,17 @@
 import sys
-from PySide6.QtCore import Qt, Slot, QByteArray, QBuffer, QIODevice
-from ui_mainwindow import Ui_MainWindow
-from PySide6.QtWidgets import (QApplication, QMainWindow, QFileDialog,
-                               QGraphicsScene, QMessageBox)
-from PySide6.QtGui import QPixmap, QImage, QPainter, QPen
-from markupdialog import MarkupDialog
-from parametersdialog import ParametersDialog
-from InteractiveScene import InteractiveScene
 import json
 from zipfile import ZipFile, ZipInfo, BadZipFile
 from datetime import datetime
+
+from PySide6.QtCore import Qt, Slot, QByteArray, QBuffer, QIODevice
+from PySide6.QtWidgets import (QApplication, QMainWindow, QFileDialog,
+                               QGraphicsScene, QMessageBox)
+from PySide6.QtGui import QPixmap, QImage, QPainter, QPen
+
+from ui_mainwindow import Ui_MainWindow
+from markupdialog import MarkupDialog
+from parametersdialog import ParametersDialog
+from InteractiveScene import InteractiveScene
 
 
 class MainWindow(QMainWindow):
@@ -348,8 +350,7 @@ class MainWindow(QMainWindow):
                 points[line[0]][1],
                 points[line[1]][0],
                 points[line[1]][1],
-                pen
-            )
+                pen)
             item.setToolTip(line)
             item.setZValue(1)
 
