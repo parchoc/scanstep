@@ -57,59 +57,60 @@ class MainWindow(QMainWindow):
         self.ui.actionSaveProject.triggered.connect(self.saveProject)
         self.ui.actionOpen.triggered.connect(self.loadProject)
 
+    def loadImage(self):
+        fileName = QFileDialog.getOpenFileName(self, 'Выбор изображения',
+                                               filter='Файлы изображений '
+                                                      '(*.png *.jpg *jpeg)'
+                                                      ';;Все файлы (*)')[0]
+        if fileName != '':
+            pixmap = QPixmap(fileName)
+            if pixmap.isNull():
+                box = QMessageBox(QMessageBox.Icon.Warning,
+                                  'Ошибка загрузки',
+                                  'Невозможно загрузить файл',
+                                  parent=self)
+                box.show()
+                return
+            return pixmap
+
+    def setupView(self, pixmap, scene, view, parameters):
+        '''
+        Set scene pixmap and compute image's dots per mm.
+        '''
+        scene.setSceneRect(0, 0, pixmap.width(), pixmap.height())
+        scene.addPixmap(pixmap)
+        view.setScene(scene)
+        parameters['dpmm'] = (pixmap.toImage().dotsPerMeterX() / 1000)
+
     @Slot()
     def loadLeftImage(self):
         '''
         Load selected image and set it as leftView background.
         '''
-        fileName = QFileDialog.getOpenFileName(self, 'Выбор изображения',
-                                               filter='Файлы изображений '
-                                                      '(*.png *.jpg *jpeg)'
-                                                      ';;Все файлы (*)')[0]
-        if fileName != '':
-            self.leftPixmap = QPixmap(fileName)
-            if self.leftPixmap.isNull():
-                box = QMessageBox(QMessageBox.Icon.Warning,
-                                  'Ошибка загрузки',
-                                  'Невозможно загрузить файл',
-                                  parent=self)
-                box.show()
-                self.leftPixmap = None
-                return
-            self.leftScene.setSceneRect(0, 0, self.leftPixmap.width(),
-                                        self.leftPixmap.height())
-            self.leftScene.addPixmap(self.leftPixmap)
-            self.leftParameters = self.PARAMETERS.copy()
-            self.leftParameters['dpmm'] = (QImage(fileName).dotsPerMeterX()
-                                           / 1000)
-            self.enableLeftMarkup(True)
+        self.leftPixmap = self.loadImage()
+        if self.leftPixmap is None:
+            return
+        self.leftParameters = self.PARAMETERS.copy()
+        self.setupView(self.leftPixmap,
+                       self.leftScene,
+                       self.ui.leftView,
+                       self.leftParameters)
+        self.enableLeftMarkup(True)
 
     @Slot()
     def loadRightImage(self):
         '''
-        Load selected image and set it as leftView background.
+        Load selected image and set it as rightView background.
         '''
-        fileName = QFileDialog.getOpenFileName(self, 'Выбор изображения',
-                                               filter='Файлы изображений '
-                                                      '(*.png *.jpg *jpeg)'
-                                                      ';;Все файлы (*)')[0]
-        if fileName != '':
-            self.rightPixmap = QPixmap(fileName)
-            if self.rightPixmap.isNull():
-                box = QMessageBox(QMessageBox.Icon.Warning,
-                                  'Ошибка загрузки',
-                                  'Невозможно загрузить файл',
-                                  parent=self)
-                box.show()
-                self.rightPixmap = None
-                return
-            self.rightScene.setSceneRect(0, 0, self.rightPixmap.width(),
-                                         self.rightPixmap.height())
-            self.rightScene.addPixmap(self.rightPixmap)
-            self.rightParameters = self.PARAMETERS.copy()
-            self.rightParameters['dpmm'] = (QImage(fileName).dotsPerMeterX()
-                                            / 1000)
-            self.enableRightMarkup(True)
+        self.rightPixmap = self.loadImage()
+        if self.rightPixmap is None:
+            return
+        self.rightParameters = self.PARAMETERS.copy()
+        self.setupView(self.rightPixmap,
+                       self.rightScene,
+                       self.ui.rightView,
+                       self.rightParameters)
+        self.enableRightMarkup(True)
 
     @Slot()
     def callLeftMarkupDialog(self):
