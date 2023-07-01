@@ -90,6 +90,7 @@ class MainWindow(QMainWindow):
         self.leftPixmap = self.loadImage()
         if self.leftPixmap is None:
             return
+        self.leftScene = InteractiveScene()
         self.leftParameters = self.PARAMETERS.copy()
         self.setupView(self.leftPixmap,
                        self.leftScene,
@@ -105,6 +106,7 @@ class MainWindow(QMainWindow):
         self.rightPixmap = self.loadImage()
         if self.rightPixmap is None:
             return
+        self.rightScene = InteractiveScene()
         self.rightParameters = self.PARAMETERS.copy()
         self.setupView(self.rightPixmap,
                        self.rightScene,
