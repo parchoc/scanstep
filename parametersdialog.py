@@ -1,6 +1,7 @@
 from ui_parametersdialog import Ui_ParametersDialog
 from PySide6.QtWidgets import QDialog
 
+
 class ParametersDialog(QDialog):
     def __init__(self, parameters, parent=None) -> None:
         super().__init__(parent)
@@ -17,5 +18,4 @@ class ParametersDialog(QDialog):
             Угол Кларка: {parameters['clark']:.2f}
             Коэффициент Чижина: {parameters['chijin']:.2f}
             Коэффициент w: {parameters['w']:.2f}
-            '''
-        )
+            ''')

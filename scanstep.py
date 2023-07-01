@@ -1,7 +1,8 @@
 import sys
 from PySide6.QtCore import Qt, Slot, QByteArray, QBuffer, QIODevice
 from ui_mainwindow import Ui_MainWindow
-from PySide6.QtWidgets import QApplication, QMainWindow, QFileDialog, QGraphicsScene, QMessageBox
+from PySide6.QtWidgets import (QApplication, QMainWindow, QFileDialog,
+                               QGraphicsScene, QMessageBox)
 from PySide6.QtGui import QPixmap, QImage, QPainter, QPen
 from markupdialog import MarkupDialog
 from parametersdialog import ParametersDialog
@@ -10,20 +11,21 @@ import json
 from zipfile import ZipFile, ZipInfo, BadZipFile
 from datetime import datetime
 
-PARAMETERS = {
-    'length': .0,
-    'width foot': .0,
-    'width heel': .0,
-    'alpha': .0,
-    'beta': .0,
-    'gamma': .0,
-    'clark': .0,
-    'chijin': .0,
-    'w': .0,
-    'dpmm': 0,
-}
 
 class MainWindow(QMainWindow):
+    PARAMETERS = {
+        'length': .0,
+        'width foot': .0,
+        'width heel': .0,
+        'alpha': .0,
+        'beta': .0,
+        'gamma': .0,
+        'clark': .0,
+        'chijin': .0,
+        'w': .0,
+        'dpmm': 0,
+    }
+
     def __init__(self) -> None:
         super(MainWindow, self).__init__()
         self.ui = Ui_MainWindow()
@@ -32,20 +34,22 @@ class MainWindow(QMainWindow):
         self.leftScene = InteractiveScene()
         self.ui.leftView.setScene(self.leftScene)
         self.leftPixmap = None
-        self.leftParameters = PARAMETERS.copy()
+        self.leftParameters = self.PARAMETERS.copy()
         # right setup
         self.rightScene = InteractiveScene()
         self.ui.rightView.setScene(self.rightScene)
         self.rightPixmap = None
-        self.rightParameters = PARAMETERS.copy()
+        self.rightParameters = self.PARAMETERS.copy()
         # connections
         self.ui.leftLoadButton.clicked.connect(self.loadLeftImage)
         self.ui.rightLoadButton.clicked.connect(self.loadRightImage)
         self.ui.leftMarkupButton.clicked.connect(self.callLeftMarkupDialog)
         self.ui.rightMarkupButton.clicked.connect(self.callRightMarkupDialog)
         self.ui.actionNewProject.triggered.connect(self.newProject)
-        self.ui.leftParametersButton.clicked.connect(self.leftParametersMessage)
-        self.ui.rightParametersButton.clicked.connect(self.rightParametersMessage)
+        self.ui.leftParametersButton.clicked.connect(
+            self.leftParametersMessage)
+        self.ui.rightParametersButton.clicked.connect(
+            self.rightParametersMessage)
         self.ui.actionSaveLeft.triggered.connect(self.saveLeftScene)
         self.ui.actionSaveRight.triggered.connect(self.saveRightScene)
         self.ui.actionSaveProject.triggered.connect(self.saveProject)
@@ -56,38 +60,53 @@ class MainWindow(QMainWindow):
         '''
         Load selected image and set it as leftView background.
         '''
-        fileName = QFileDialog.getOpenFileName(self, 'Выбор изображения', filter='Файлы изображений (*.png *.jpg *jpeg);;Все файлы (*)')[0]
+        fileName = QFileDialog.getOpenFileName(self, 'Выбор изображения',
+                                               filter='Файлы изображений '
+                                                      '(*.png *.jpg *jpeg)'
+                                                      ';;Все файлы (*)')[0]
         if fileName != '':
             self.leftPixmap = QPixmap(fileName)
             if self.leftPixmap.isNull():
-                box = QMessageBox(QMessageBox.Icon.Warning, 'Ошибка загрузки', 'Невозможно загрузить файл', parent=self)
+                box = QMessageBox(QMessageBox.Icon.Warning,
+                                  'Ошибка загрузки',
+                                  'Невозможно загрузить файл',
+                                  parent=self)
                 box.show()
                 self.leftPixmap = None
                 return
-            self.leftScene.setSceneRect(0, 0, self.leftPixmap.width(), self.leftPixmap.height())
+            self.leftScene.setSceneRect(0, 0, self.leftPixmap.width(),
+                                        self.leftPixmap.height())
             self.leftScene.addPixmap(self.leftPixmap)
-            self.leftParameters = PARAMETERS.copy()
-            self.leftParameters['dpmm'] = QImage(fileName).dotsPerMeterX() / 1000
+            self.leftParameters = self.PARAMETERS.copy()
+            self.leftParameters['dpmm'] = (QImage(fileName).dotsPerMeterX()
+                                           / 1000)
             self.enableLeftMarkup(True)
-            
 
     @Slot()
     def loadRightImage(self):
         '''
         Load selected image and set it as leftView background.
         '''
-        fileName = QFileDialog.getOpenFileName(self, 'Выбор изображения', filter='Файлы изображений (*.png *.jpg *jpeg);;Все файлы (*)')[0]
+        fileName = QFileDialog.getOpenFileName(self, 'Выбор изображения',
+                                               filter='Файлы изображений '
+                                                      '(*.png *.jpg *jpeg)'
+                                                      ';;Все файлы (*)')[0]
         if fileName != '':
             self.rightPixmap = QPixmap(fileName)
             if self.rightPixmap.isNull():
-                box = QMessageBox(QMessageBox.Icon.Warning, 'Ошибка загрузки', 'Невозможно загрузить файл', parent=self)
+                box = QMessageBox(QMessageBox.Icon.Warning,
+                                  'Ошибка загрузки',
+                                  'Невозможно загрузить файл',
+                                  parent=self)
                 box.show()
                 self.rightPixmap = None
                 return
-            self.rightScene.setSceneRect(0, 0, self.rightPixmap.width(), self.rightPixmap.height())
+            self.rightScene.setSceneRect(0, 0, self.rightPixmap.width(),
+                                         self.rightPixmap.height())
             self.rightScene.addPixmap(self.rightPixmap)
-            self.rightParameters = PARAMETERS.copy()
-            self.rightParameters['dpmm'] = QImage(fileName).dotsPerMeterX() / 1000
+            self.rightParameters = self.PARAMETERS.copy()
+            self.rightParameters['dpmm'] = (QImage(fileName).dotsPerMeterX()
+                                            / 1000)
             self.enableRightMarkup(True)
 
     @Slot()
@@ -101,7 +120,7 @@ class MainWindow(QMainWindow):
         dialog = MarkupDialog(self, self.rightScene, self.rightParameters)
         dialog.markupDone.connect(self.updateRightScene)
         dialog.show()
-    
+
     @Slot(QGraphicsScene, dict)
     def updateLeftScene(self, newScene, newParameters):
         self.leftScene = newScene
@@ -119,32 +138,36 @@ class MainWindow(QMainWindow):
         # left setup
         self.leftScene = InteractiveScene()
         self.ui.leftView.setScene(self.leftScene)
-        self.leftParameters = PARAMETERS.copy()
+        self.leftParameters = self.PARAMETERS.copy()
         self.leftPixmap = None
         self.enableLeftMarkup(False)
         # right setup
         self.rightScene = InteractiveScene()
         self.ui.rightView.setScene(self.rightScene)
-        self.rightParameters = PARAMETERS.copy()
+        self.rightParameters = self.PARAMETERS.copy()
         self.rightPixmap = None
         self.enableRightMarkup(False)
-    
+
     @Slot()
     def leftParametersMessage(self):
         dialog = ParametersDialog(self.leftParameters, self)
         dialog.setWindowTitle('Характеристики левой стопы')
         dialog.show()
-    
+
     @Slot()
     def rightParametersMessage(self):
         dialog = ParametersDialog(self.rightParameters, self)
         dialog.setWindowTitle('Характеристики правой стопы')
         dialog.show()
-    
+
     def saveScene(self, scene):
-        filename, format = QFileDialog.getSaveFileName(self, 'Сохранение изображения', filter='JPEG (*.jpeg);;PNG (*.png)')
+        filename, format = QFileDialog.getSaveFileName(
+            self,
+            'Сохранение изображения',
+            filter='JPEG (*.jpeg);;PNG (*.png)')
         if filename != '':
-            image = QImage(scene.sceneRect().size().toSize(), QImage.Format.Format_ARGB32)
+            image = QImage(scene.sceneRect().size().toSize(),
+                           QImage.Format.Format_ARGB32)
             image.fill(Qt.GlobalColor.transparent)
             painter = QPainter(image)
             scene.render(painter)
@@ -152,17 +175,20 @@ class MainWindow(QMainWindow):
             try:
                 image.save(filename, format.split(' ', 1)[0])
             except OSError:
-                box = QMessageBox(QMessageBox.Icon.Warning, 'Ошибка сохранения', 'Невозможно сохранить файл', parent=self)
+                box = QMessageBox(QMessageBox.Icon.Warning,
+                                  'Ошибка сохранения',
+                                  'Невозможно сохранить файл',
+                                  parent=self)
                 box.show()
 
     @Slot()
     def saveLeftScene(self):
         self.saveScene(self.leftScene)
-    
+
     @Slot()
     def saveRightScene(self):
         self.saveScene(self.rightScene)
-    
+
     @Slot()
     def saveProject(self):
         '''
@@ -183,10 +209,13 @@ class MainWindow(QMainWindow):
                 }
             }
             'right': ...
-        Images saved as png files with names left.png and right.png corresponding
-        if they exist.
+        Images saved as png files with names left.png and right.png
+        corresponding if they exist.
         '''
-        filename, _ = QFileDialog.getSaveFileName(self, 'Сохранение проекта', filter='Project file (*.paw)')
+        filename, _ = QFileDialog.getSaveFileName(
+            self,
+            'Сохранение проекта',
+            filter='Project file (*.paw)')
         if filename != '':
             save_dict = {}
             # left scene
@@ -205,14 +234,20 @@ class MainWindow(QMainWindow):
                     timetuple = datetime.now().timetuple()
                     # left pixmap
                     if self.leftPixmap:
-                        savefile.writestr(ZipInfo('left.png', timetuple), left_bytes)
+                        savefile.writestr(ZipInfo('left.png', timetuple),
+                                          left_bytes)
                     # right pixmap
                     if self.rightPixmap:
-                        savefile.writestr(ZipInfo('right.png', timetuple), right_bytes)
+                        savefile.writestr(ZipInfo('right.png', timetuple),
+                                          right_bytes)
                     # dictinary
-                    savefile.writestr(ZipInfo('items.json', timetuple), json.dumps(save_dict))
+                    savefile.writestr(ZipInfo('items.json', timetuple),
+                                      json.dumps(save_dict))
             except OSError:
-                box = QMessageBox(QMessageBox.Icon.Warning, 'Ошибка сохранения', 'Невозможно сохранить проект', parent=self)
+                box = QMessageBox(QMessageBox.Icon.Warning,
+                                  'Ошибка сохранения',
+                                  'Невозможно сохранить проект',
+                                  parent=self)
                 box.show()
 
     def saveItems(self, scene):
@@ -223,22 +258,26 @@ class MainWindow(QMainWindow):
         for item in scene.items():
             # PointItem
             if item.type() == 65537:
-                save_dict['points'][item.toolTip()] = (item.pos().x(), item.pos().y())
+                save_dict['points'][item.toolTip()] = (item.pos().x(),
+                                                       item.pos().y())
             # QGraphicsLineItem
             elif item.type() == 6:
                 save_dict['lines'].append(item.toolTip())
         return save_dict
-    
+
     def pixmapToBytes(self, pixmap):
         b_array = QByteArray()
         buffer = QBuffer(b_array)
         buffer.open(QIODevice.OpenModeFlag.WriteOnly)
         pixmap.save(buffer, 'PNG')
         return b_array.data()
-    
+
     @Slot()
     def loadProject(self):
-        fileName = QFileDialog.getOpenFileName(self, 'Загрузить проект', filter='Project file (*.paw)')[0]
+        fileName = QFileDialog.getOpenFileName(
+            self,
+            'Загрузить проект',
+            filter='Project file (*.paw)')[0]
         if fileName != '':
             try:
                 with ZipFile(fileName, 'r') as loadfile:
@@ -248,7 +287,9 @@ class MainWindow(QMainWindow):
                     try:
                         self.leftPixmap = QPixmap()
                         self.leftPixmap.loadFromData(loadfile.read('left.png'))
-                        self.leftScene = InteractiveScene(self.leftPixmap.width(), self.leftPixmap.height())
+                        self.leftScene = InteractiveScene(
+                            self.leftPixmap.width(),
+                            self.leftPixmap.height())
                         self.leftScene.addPixmap(self.leftPixmap)
                         self.ui.leftView.setScene(self.leftScene)
                         self.enableLeftMarkup(True)
@@ -256,8 +297,11 @@ class MainWindow(QMainWindow):
                         pass
                     try:
                         self.rightPixmap = QPixmap()
-                        self.rightPixmap.loadFromData(loadfile.read('right.png'))
-                        self.rightScene = InteractiveScene(self.rightPixmap.width(), self.rightPixmap.height())
+                        self.rightPixmap.loadFromData(
+                            loadfile.read('right.png'))
+                        self.rightScene = InteractiveScene(
+                            self.rightPixmap.width(),
+                            self.rightPixmap.height())
                         self.rightScene.addPixmap(self.rightPixmap)
                         self.ui.rightView.setScene(self.rightScene)
                         self.enableRightMarkup(True)
@@ -265,19 +309,30 @@ class MainWindow(QMainWindow):
                         pass
                     items_dict = json.loads(loadfile.read('items.json'))
                     # adding points
-                    self.loadPoints(self.leftScene, items_dict['left']['points'])
-                    self.loadPoints(self.rightScene, items_dict['right']['points'])
+                    self.loadPoints(self.leftScene,
+                                    items_dict['left']['points'])
+                    self.loadPoints(self.rightScene,
+                                    items_dict['right']['points'])
                     # adding lines
                     linePen = QPen()
                     linePen.setColor(Qt.GlobalColor.red)
                     linePen.setWidth(1)
-                    self.loadLines(self.leftScene, items_dict['left']['points'], items_dict['left']['lines'], linePen)
-                    self.loadLines(self.rightScene, items_dict['right']['points'], items_dict['right']['lines'], linePen)
+                    self.loadLines(self.leftScene,
+                                   items_dict['left']['points'],
+                                   items_dict['left']['lines'],
+                                   linePen)
+                    self.loadLines(self.rightScene,
+                                   items_dict['right']['points'],
+                                   items_dict['right']['lines'],
+                                   linePen)
                     # adding parameters
                     self.leftParameters = items_dict['left']['parameters']
                     self.rightParameters = items_dict['right']['parameters']
             except BadZipFile:
-                box = QMessageBox(QMessageBox.Icon.Warning, 'Ошибка загрузки', 'Невозможно открыть файл', parent=self)
+                box = QMessageBox(QMessageBox.Icon.Warning,
+                                  'Ошибка загрузки',
+                                  'Невозможно открыть файл',
+                                  parent=self)
                 box.show()
 
     def loadPoints(self, scene, points):
@@ -285,7 +340,7 @@ class MainWindow(QMainWindow):
             point = scene.addPoint(pos[0], pos[1], 3)
             point.setToolTip(name)
             point.setZValue(2)
-    
+
     def loadLines(self, scene, points, lines, pen):
         for line in lines:
             item = scene.addLine(
@@ -297,12 +352,12 @@ class MainWindow(QMainWindow):
             )
             item.setToolTip(line)
             item.setZValue(1)
-    
+
     def enableLeftMarkup(self, enable: bool):
         self.ui.leftMarkupButton.setEnabled(enable)
         self.ui.leftParametersButton.setEnabled(enable)
         self.ui.actionSaveLeft.setEnabled(enable)
-    
+
     def enableRightMarkup(self, enable: bool):
         self.ui.rightMarkupButton.setEnabled(enable)
         self.ui.rightParametersButton.setEnabled(enable)

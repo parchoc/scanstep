@@ -51,9 +51,10 @@ SCHEME = {
     'I': (240, 291),
 }
 
+
 class MarkupDialog(QDialog):
     markupDone = Signal(QGraphicsScene, dict)
-    
+
     def __init__(self, parent=None, scene=None, parameters=None) -> None:
         super(MarkupDialog, self).__init__(parent)
         self.ui = Ui_MarkupDialog()
@@ -113,7 +114,7 @@ class MarkupDialog(QDialog):
         if self.prevPoint in items:
             items[self.prevPoint].setBrush(self.circleBrush)
         self.markupDone.emit(self.scene, self.parameters)
-    
+
     def glueTo(self, point, line_item):
         line = line_item.line()
         perpendicular = self.perpendicularTo(point, line)
@@ -138,7 +139,8 @@ class MarkupDialog(QDialog):
         self.updateParametersDisplay()
         # go to the next point if it not the last one
         if self.ui.pointsBox.currentIndex() < self.ui.pointsBox.count() - 1:
-            self.ui.pointsBox.setCurrentIndex(self.ui.pointsBox.currentIndex() + 1)
+            self.ui.pointsBox.setCurrentIndex(
+                self.ui.pointsBox.currentIndex() + 1)
 
     @Slot(QGraphicsItem, str)
     def updatePoint(self, point, name):
@@ -149,7 +151,7 @@ class MarkupDialog(QDialog):
         # add new point to dict
         point.setToolTip(name)
         point.setZValue(2)
-    
+
     @Slot(str)
     def updateLines(self, updated_point):
         items = self.scene.itemsDict()
@@ -164,12 +166,15 @@ class MarkupDialog(QDialog):
     @Slot(str)
     def updateParameters(self, updated_point):
         items = self.scene.itemsDict()
-        # check if all points for computetion exist and related point has been modified
+        # check if all points for computetion exist and
+        # related point has been modified
         # length
-        if updated_point in {'Y', "X", "Z"} and len({'Y', "X", "Z"}.intersection(items)) == 3:
+        if (updated_point in {'Y', "X", "Z"}
+                and len({'Y', "X", "Z"}.intersection(items)) == 3):
             self.parameters['length'] = self.lengthFoot()
         # plot C
-        if updated_point in {'Y', "A"} and len({'Y', "A"}.intersection(items)) == 2:
+        if (updated_point in {'Y', "A"}
+                and len({'Y', "A"}.intersection(items)) == 2):
             self.plotC()
             items = self.scene.itemsDict()
         # remove IK if one of dependent points is relocated
@@ -181,41 +186,58 @@ class MarkupDialog(QDialog):
             del items['K']
             del items['IK']
         # plot I
-        if updated_point in {'Y', 'A', "B", 'G'} and len({'C', "B", 'G'}.intersection(items)) == 3:
+        if (updated_point in {'Y', 'A', "B", 'G'}
+                and len({'C', "B", 'G'}.intersection(items)) == 3):
             self.plotI()
             items = self.scene.itemsDict()
         # plot K
-        if updated_point in {'Y', 'A', "F", 'H'} and len({'C', "F", 'H'}.intersection(items)) == 3:
+        if (updated_point in {'Y', 'A', "F", 'H'}
+                and len({'C', "F", 'H'}.intersection(items)) == 3):
             self.plotK()
             items = self.scene.itemsDict()
         # plot IK
-        if updated_point in {'Y', 'A', "F", 'H', 'B', 'G'} and len({'I', "K"}.intersection(items)) == 2:
+        if (updated_point in {'Y', 'A', "F", 'H', 'B', 'G'}
+                and len({'I', "K"}.intersection(items)) == 2):
             self.addLine('IK')
             items = self.scene.itemsDict()
         # foot width
-        if updated_point in {'H', 'G'} and len({'H', 'G'}.intersection(items)) == 2:
+        if (updated_point in {'H', 'G'}
+                and len({'H', 'G'}.intersection(items)) == 2):
             self.parameters['width foot'] = self.widthFoot(items['GH'].line())
         # heel width
-        if updated_point in {'B', 'F'} and len({'B', 'F'}.intersection(items)) == 2:
+        if (updated_point in {'B', 'F'}
+                and len({'B', 'F'}.intersection(items)) == 2):
             self.parameters['width heel'] = self.widthFoot(items['BF'].line())
         # angle alpha(BG, GL)
-        if updated_point in {'B', 'G', 'L' } and len({'B', 'G', 'L'}.intersection(items)) == 3:
-            self.parameters['alpha'] = self.angle(items['BG'].line(), items['GL'].line())
+        if (updated_point in {'B', 'G', 'L'}
+                and len({'B', 'G', 'L'}.intersection(items)) == 3):
+            self.parameters['alpha'] = self.angle(items['BG'].line(),
+                                                  items['GL'].line())
         # angle beta(HM, FH)
-        if updated_point in {'H', 'M', 'F'} and len({'H', 'M', 'F'}.intersection(items)) == 3:
-            self.parameters['beta'] = self.angle(items['HM'].line(), items['FH'].line())
+        if (updated_point in {'H', 'M', 'F'}
+                and len({'H', 'M', 'F'}.intersection(items)) == 3):
+            self.parameters['beta'] = self.angle(items['HM'].line(),
+                                                 items['FH'].line())
         # angle gamma(BG, FH)
-        if updated_point in {'B', 'G', 'F', 'H'} and len({'B', 'G', 'F', 'H'}.intersection(items)) == 4:
-            self.parameters['gamma'] = self.angle(items['BG'].line(), items['FH'].line())
+        if (updated_point in {'B', 'G', 'F', 'H'}
+                and len({'B', 'G', 'F', 'H'}.intersection(items)) == 4):
+            self.parameters['gamma'] = self.angle(items['BG'].line(),
+                                                  items['FH'].line())
         # angle clark(GN, BG)
-        if updated_point in {'G', 'N', 'B'} and len({'G', 'N', 'B'}.intersection(items)) == 3:
-            self.parameters['clark'] = self.angle(items['GN'].line(), items['BG'].line())
+        if (updated_point in {'G', 'N', 'B'}
+                and len({'G', 'N', 'B'}.intersection(items)) == 3):
+            self.parameters['clark'] = self.angle(items['GN'].line(),
+                                                  items['BG'].line())
         # w = length/foot width
-        if updated_point in {'Y', "X", "Z", 'H', 'G'} and len({'Y', "X", "Z", 'H', 'G'}.intersection(items)) == 5:
+        if (updated_point in {'Y', "X", "Z", 'H', 'G'}
+                and len({'Y', "X", "Z", 'H', 'G'}.intersection(items)) == 5):
             self.parameters['w'] = self.w()
         # chijin = DE/EI
-        if updated_point in {'D', "E"} and len({'D', "E", 'I'}.intersection(items)) == 3:
-            self.parameters['chijin'] = QLineF(items['D'].pos(), items['E'].pos()).length() / QLineF(items['E'].pos(), items['I'].pos()).length()
+        if (updated_point in {'D', "E"}
+                and len({'D', "E", 'I'}.intersection(items)) == 3):
+            length_DE = QLineF(items['D'].pos(), items['E'].pos()).length()
+            length_EI = QLineF(items['E'].pos(), items['I'].pos()).length()
+            self.parameters['chijin'] = length_DE / length_EI
 
     @Slot()
     def updateParametersDisplay(self):
@@ -230,23 +252,21 @@ class MarkupDialog(QDialog):
             Угол Кларка: {self.parameters['clark']:.2f}
             Коэффициент Чижина: {self.parameters['chijin']:.2f}
             Коэффициент w: {self.parameters['w']:.2f}
-            '''
-        )
+            ''')
 
     def addLine(self, line):
         items = self.scene.itemsDict()
         if line in items:
             self.scene.removeItem(items[line])
         items[line] = self.scene.addLine(
-                items[line[0]].x(), 
+                items[line[0]].x(),
                 items[line[0]].y(),
-                items[line[1]].x(), 
-                items[line[1]].y(), 
-                self.linePen
-            )
+                items[line[1]].x(),
+                items[line[1]].y(),
+                self.linePen)
         items[line].setToolTip(line)
         items[line].setZValue(1)
-        
+
     def perpendicularTo(self, point, line):
         angle = line.normalVector().angle()
         perpendicular = QLineF(point.pos(), point.pos() + QPointF(5, 5))
@@ -274,7 +294,11 @@ class MarkupDialog(QDialog):
             inter_type, intersectionPoint = XY.intersects(perpendicular)
             if inter_type:
                 # adding intersection point to the scene
-                point = PointItem(intersectionPoint.x(), intersectionPoint.y(), 3, self.circlePen, self.circleBrush)
+                point = PointItem(intersectionPoint.x(),
+                                  intersectionPoint.y(),
+                                  3,
+                                  self.circlePen,
+                                  self.circleBrush)
                 self.scene.addItem(point)
                 self.updatePoint(point, 'W')
                 # adding perpendicular line to the scene
@@ -284,39 +308,44 @@ class MarkupDialog(QDialog):
             else:
                 length = XY.length()
         return length / self.parameters['dpmm']
-    
+
     def widthFoot(self, line):
         return line.length() / self.parameters['dpmm']
-    
+
     def angle(self, line_a, line_b):
         angle = line_a.angleTo(line_b)
         return min(angle, 360 - angle)
-    
+
     def w(self):
         return self.parameters['length'] / self.parameters['width foot']
-    
+
     def plotC(self):
         items = self.scene.itemsDict()
         pos = (items['A'].pos() + items['Y'].pos()) / 2
-        point = PointItem(pos.x(), pos.y(), 3, self.circlePen, self.circleBrush, items['XY'])
+        point = PointItem(pos.x(), pos.y(), 3, self.circlePen,
+                          self.circleBrush, items['XY'])
         self.updatePoint(point, 'C')
 
     def plotK(self):
         items = self.scene.itemsDict()
         perpendicular = self.perpendicularTo(items['C'], items['XY'].line())
-        inter_type, intersectionPoint = items['FH'].line().intersects(perpendicular)
+        fh = items['FH'].line()
+        inter_type, intersectionPoint = fh.intersects(perpendicular)
         if inter_type:
-            point = PointItem(intersectionPoint.x(), intersectionPoint.y(), 3, self.circlePen, self.circleBrush, items['FH'])
+            point = PointItem(intersectionPoint.x(), intersectionPoint.y(),
+                              3, self.circlePen, self.circleBrush, items['FH'])
             self.updatePoint(point, 'K')
 
     def plotI(self):
         items = self.scene.itemsDict()
         perpendicular = self.perpendicularTo(items['C'], items['XY'].line())
-        inter_type, intersectionPoint = items['BG'].line().intersects(perpendicular)
+        bg = items['BG'].line()
+        inter_type, intersectionPoint = bg.intersects(perpendicular)
         if inter_type:
-            point = PointItem(intersectionPoint.x(), intersectionPoint.y(), 3, self.circlePen, self.circleBrush, items['BG'])
+            point = PointItem(intersectionPoint.x(), intersectionPoint.y(), 3,
+                              self.circlePen, self.circleBrush, items['BG'])
             self.updatePoint(point, 'I')
-    
+
     @Slot()
     def hightlightPoint(self):
         current_text = self.ui.pointsBox.currentText()
@@ -327,7 +356,7 @@ class MarkupDialog(QDialog):
             items[current_text].setBrush(self.hightlightBrush)
         self.hightlightScheme()
         self.prevPoint = current_text
-    
+
     @Slot()
     def hightlightScheme(self):
         items = self.schemeScene.itemsDict()
