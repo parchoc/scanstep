@@ -1,10 +1,22 @@
-from PySide6.QtWidgets import QDialog
+from PySide6.QtWidgets import QDialog, QWidget
 
 from ui_parametersdialog import Ui_ParametersDialog
 
 
 class ParametersDialog(QDialog):
-    def __init__(self, parameters, parent=None) -> None:
+    """
+    Foot parameters info dialog.
+
+    Attributes
+    ----------
+    parameters : dict[str, float]
+        Dictinary with foot parameters. Must have keys: 'length', 'width foot',
+        'width heel', 'alpha', 'beta', 'gamma', 'clark', 'chijin', 'w'.
+    parent : QWidjet, optional
+        Parent of the dialog.
+    """
+    def __init__(self, parameters: dict[str, float],
+                 parent: QWidget | None = None) -> None:
         super().__init__(parent)
         self.ui = Ui_ParametersDialog()
         self.ui.setupUi(self)
