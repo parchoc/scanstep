@@ -46,13 +46,13 @@ SCHEME = {
     'B': (235, 433),
     "G": (246, 148),
     'A': (141, 86),
-    'D': (55, 296),
+    'D': (49, 296),
     'E': (127, 295),
     'L': (232, 66),
     'M': (27, 131),
     'N': (139, 207),
-    'K': (49, 296),
-    'I': (240, 291),
+    # 'K': (49, 296),
+    # 'I': (240, 291),
 }
 
 PARAMETERS_MESSAGE = '''Длина стопы: {length:.2f}
@@ -326,8 +326,11 @@ class MarkupDialog(QDialog):
         # angle clark(GN, BG)
         if (updated_point in {'G', 'N', 'B'}
                 and len({'G', 'N', 'B'}.intersection(items)) == 3):
-            self.parameters['clark'] = self.angle(items['GN'].line(),
-                                                  items['BG'].line())
+            gb = QLineF(
+                items['G'].pos(),
+                items['B'].pos()
+            )
+            self.parameters['clark'] = self.angle(items['GN'].line(), gb)
         # w = length/foot width
         if (updated_point in {'Y', "X", "Z", 'H', 'G'}
                 and len({'Y', "X", "Z", 'H', 'G'}.intersection(items)) == 5):
