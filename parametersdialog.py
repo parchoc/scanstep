@@ -2,6 +2,16 @@ from PySide6.QtWidgets import QDialog, QWidget
 
 from ui_parametersdialog import Ui_ParametersDialog
 
+PARAMETERS_MESSAGE = '''Длина стопы: {length:.2f}
+Ширина стопы: {width_foot:.2f}
+Ширина пятки: {width_heel:.2f}
+α: {alpha:.2f}
+β: {beta:.2f}
+γ: {gamma:.2f}
+Угол Кларка: {clark:.2f}
+Коэффициент Чижина: {chijin:.2f}
+Коэффициент w: {w:.2f}'''
+
 
 class ParametersDialog(QDialog):
     """
@@ -10,8 +20,8 @@ class ParametersDialog(QDialog):
     Attributes
     ----------
     parameters : dict[str, float]
-        Dictinary with foot parameters. Must have keys: 'length', 'width foot',
-        'width heel', 'alpha', 'beta', 'gamma', 'clark', 'chijin', 'w'.
+        Dictinary with foot parameters. Must have keys: 'length', 'width_foot',
+        'width_heel', 'alpha', 'beta', 'gamma', 'clark', 'chijin', 'w'.
     parent : QWidjet, optional
         Parent of the dialog.
     """
@@ -20,15 +30,4 @@ class ParametersDialog(QDialog):
         super().__init__(parent)
         self.ui = Ui_ParametersDialog()
         self.ui.setupUi(self)
-        self.ui.textEdit.setPlainText(
-            f'''
-            Длина стопы: {parameters['length']:.2f}
-            Ширина стопы: {parameters['width foot']:.2f}
-            Ширина пятки: {parameters['width heel']:.2f}
-            α: {parameters['alpha']:.2f}
-            β: {parameters['beta']:.2f}
-            γ: {parameters['gamma']:.2f}
-            Угол Кларка: {parameters['clark']:.2f}
-            Коэффициент Чижина: {parameters['chijin']:.2f}
-            Коэффициент w: {parameters['w']:.2f}
-            ''')
+        self.ui.textEdit.setPlainText(PARAMETERS_MESSAGE.format(**parameters))

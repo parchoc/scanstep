@@ -19,8 +19,8 @@ class MainWindow(QMainWindow):
 
     PARAMETERS = {
         'length': .0,
-        'width foot': .0,
-        'width heel': .0,
+        'width_foot': .0,
+        'width_heel': .0,
         'alpha': .0,
         'beta': .0,
         'gamma': .0,

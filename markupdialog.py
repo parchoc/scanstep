@@ -55,6 +55,16 @@ SCHEME = {
     'I': (240, 291),
 }
 
+PARAMETERS_MESSAGE = '''Длина стопы: {length:.2f}
+Ширина стопы: {width_foot:.2f}
+Ширина пятки: {width_heel:.2f}
+α: {alpha:.2f}
+β: {beta:.2f}
+γ: {gamma:.2f}
+Угол Кларка: {clark:.2f}
+Коэффициент Чижина: {chijin:.2f}
+Коэффициент w: {w:.2f}'''
+
 
 class MarkupDialog(QDialog):
     """
@@ -293,11 +303,11 @@ class MarkupDialog(QDialog):
         # foot width
         if (updated_point in {'H', 'G'}
                 and len({'H', 'G'}.intersection(items)) == 2):
-            self.parameters['width foot'] = self.widthFoot(items['GH'].line())
+            self.parameters['width_foot'] = self.widthFoot(items['GH'].line())
         # heel width
         if (updated_point in {'B', 'F'}
                 and len({'B', 'F'}.intersection(items)) == 2):
-            self.parameters['width heel'] = self.widthFoot(items['BF'].line())
+            self.parameters['width_heel'] = self.widthFoot(items['BF'].line())
         # angle alpha(BG, GL)
         if (updated_point in {'B', 'G', 'L'}
                 and len({'B', 'G', 'L'}.intersection(items)) == 3):
@@ -333,17 +343,7 @@ class MarkupDialog(QDialog):
     def updateParametersDisplay(self) -> None:
         """Update parameters display."""
         self.ui.parametersDisplay.setPlainText(
-            f'''
-            Длина стопы: {self.parameters['length']:.2f}
-            Ширина стопы: {self.parameters['width foot']:.2f}
-            Ширина пятки: {self.parameters['width heel']:.2f}
-            α: {self.parameters['alpha']:.2f}
-            β: {self.parameters['beta']:.2f}
-            γ: {self.parameters['gamma']:.2f}
-            Угол Кларка: {self.parameters['clark']:.2f}
-            Коэффициент Чижина: {self.parameters['chijin']:.2f}
-            Коэффициент w: {self.parameters['w']:.2f}
-            ''')
+            PARAMETERS_MESSAGE.format(**self.parameters))
 
     def addLine(self, line: str) -> None:
         """
@@ -490,7 +490,7 @@ class MarkupDialog(QDialog):
         float
             w coefficient.
         """
-        return self.parameters['length'] / self.parameters['width foot']
+        return self.parameters['length'] / self.parameters['width_foot']
 
     def plotC(self) -> None:
         """
