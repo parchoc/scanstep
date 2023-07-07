@@ -63,7 +63,7 @@ PARAMETERS_MESSAGE = '''Длина стопы: {length:.2f}
 γ: {gamma:.2f}
 Угол Кларка: {clark:.2f}
 Коэффициент Чижина: {chijin:.2f}
-Коэффициент w: {w:.2f}'''
+Коэффициент W: {w:.2f}'''
 
 
 class MarkupDialog(QDialog):
