@@ -1,1 +1,0 @@
-C:\Users\kostr\anaconda3\Lib\site-packages\PySide6\rcc.exe res.qrc -o res.py -g python

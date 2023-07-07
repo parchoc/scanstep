@@ -1,1 +1,0 @@
-C:/Users/kostr/anaconda3/envs/pyside6/python.exe -m nuitka scanstep.py --standalone --enable-plugin=pyside6 --output-dir=..\ScanStep_bin --disable-console --follow-imports --windows-icon-from-ico=icon.png
