@@ -18,6 +18,7 @@ from PySide6.QtGui import (QBrush, QColor, QConicalGradient, QCursor,
 from PySide6.QtWidgets import (QAbstractButton, QApplication, QComboBox, QDialog,
     QDialogButtonBox, QFrame, QGraphicsView, QHBoxLayout,
     QSizePolicy, QTextEdit, QVBoxLayout, QWidget)
+from interactiveview import InteractiveView
 
 class Ui_MarkupDialog(object):
     def setupUi(self, MarkupDialog):
@@ -49,7 +50,7 @@ class Ui_MarkupDialog(object):
         self.horizontalLayout.setObjectName(u"horizontalLayout")
         self.verticalLayout = QVBoxLayout()
         self.verticalLayout.setObjectName(u"verticalLayout")
-        self.schemeView = QGraphicsView(MarkupDialog)
+        self.schemeView = InteractiveView(MarkupDialog)
         self.schemeView.setObjectName(u"schemeView")
         sizePolicy = QSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
         sizePolicy.setHorizontalStretch(0)
@@ -81,7 +82,7 @@ class Ui_MarkupDialog(object):
 
         self.horizontalLayout.addWidget(self.line)
 
-        self.markupView = QGraphicsView(MarkupDialog)
+        self.markupView = InteractiveView(MarkupDialog)
         self.markupView.setObjectName(u"markupView")
         sizePolicy2 = QSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
         sizePolicy2.setHorizontalStretch(1)

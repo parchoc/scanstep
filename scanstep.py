@@ -105,6 +105,7 @@ class MainWindow(QMainWindow):
         scene.setSceneRect(0, 0, pixmap.width(), pixmap.height())
         scene.addPixmap(pixmap)
         view.setScene(scene)
+        view.scaleScene()
         parameters['dpmm'] = pixmap.toImage().dotsPerMeterX() / 1000
 
     @Slot()

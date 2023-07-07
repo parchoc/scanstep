@@ -127,6 +127,7 @@ class MarkupDialog(QDialog):
             if point in items and line in items:
                 items[point].setParentItem(items[line])
         self.ui.markupView.setScene(self.scene)
+        self.ui.markupView.scaleScene()
         # scheme
         scheme = QPixmap(u":/img/foot_sheme.jpg")
         self.schemeScene = InteractiveScene(scheme.width(), scheme.height())
@@ -135,6 +136,7 @@ class MarkupDialog(QDialog):
             item = self.schemeScene.addPoint(pos[0], pos[1], 4)
             item.setToolTip(name)
         self.ui.schemeView.setScene(self.schemeScene)
+        self.ui.schemeView.scaleScene()
         self.hightlightPoint()
         # connections
         self.accepted.connect(self.sendScene)

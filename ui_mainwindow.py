@@ -20,6 +20,7 @@ from PySide6.QtWidgets import (QApplication, QFrame, QGraphicsView, QHBoxLayout,
     QMainWindow, QMenu, QMenuBar, QPushButton,
     QSizePolicy, QStatusBar, QVBoxLayout, QWidget)
 import res
+from interactiveview import InteractiveView
 
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
@@ -49,7 +50,7 @@ class Ui_MainWindow(object):
         self.horizontalLayout_3.setObjectName(u"horizontalLayout_3")
         self.verticalLayout_2 = QVBoxLayout()
         self.verticalLayout_2.setObjectName(u"verticalLayout_2")
-        self.leftView = QGraphicsView(self.centralwidget)
+        self.leftView = InteractiveView(self.centralwidget)
         self.leftView.setObjectName(u"leftView")
         self.leftView.viewport().setProperty("cursor", QCursor(Qt.ArrowCursor))
         self.leftView.setMouseTracking(False)
@@ -91,7 +92,7 @@ class Ui_MainWindow(object):
 
         self.verticalLayout = QVBoxLayout()
         self.verticalLayout.setObjectName(u"verticalLayout")
-        self.rightView = QGraphicsView(self.centralwidget)
+        self.rightView = InteractiveView(self.centralwidget)
         self.rightView.setObjectName(u"rightView")
         self.rightView.viewport().setProperty("cursor", QCursor(Qt.ArrowCursor))
         self.rightView.setMouseTracking(False)
