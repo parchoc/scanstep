@@ -85,28 +85,23 @@ class MarkupDialog(QDialog):
     LINE_Z_VALUE: int = 1
     POINT_Z_VALUE: int = 2
 
-    def __init__(self, parent: type[QWidget] | None = None,
-                 scene: type[QGraphicsScene] | None = None,
-                 parameters: dict[str, float] | float = None) -> None:
+    def __init__(self, scene: type[QGraphicsScene],
+                 parameters: dict[str, float],
+                 parent: type[QWidget] | None = None) -> None:
         super(MarkupDialog, self).__init__(parent)
         self.ui = Ui_MarkupDialog()
         self.ui.setupUi(self)
-        if scene:
-            self.scene = InteractiveScene(scene.width(), scene.height())
-        else:
-            self.scene = InteractiveScene()
+        self.scene = InteractiveScene(scene.width(), scene.height(),
+                                      radius=parameters['radius'])
         self.circlePen = QPen()
         self.circlePen.setWidth(2)
         self.circleBrush = QBrush(Qt.GlobalColor.red)
         self.hightlightBrush = QBrush(Qt.GlobalColor.blue)
         self.linePen = QPen()
         self.linePen.setColor(Qt.GlobalColor.red)
-        self.linePen.setWidth(1)
+        self.linePen.setWidthF(parameters['line_width'])
         self.prevPoint = self.ui.pointsBox.currentText()
-        if parameters:
-            self.parameters = parameters
-        else:
-            self.parameters = {}
+        self.parameters = parameters
         self.updateParametersDisplay()
         # adding items to the scene
         items = {}
@@ -117,7 +112,8 @@ class MarkupDialog(QDialog):
                 self.scene.addPixmap(item.pixmap())
             # adding point items from initial scene
             if item.type() == PointItem.Type:
-                items[name] = self.scene.addPoint(item.x(), item.y(), 3)
+                items[name] = self.scene.addPoint(item.x(), item.y(),
+                                                  self.parameters['radius'])
                 items[name].setZValue(self.POINT_Z_VALUE)
                 items[name].setToolTip(name)
             # adding lines
@@ -433,7 +429,7 @@ class MarkupDialog(QDialog):
                 # adding intersection point to the scene
                 point = PointItem(intersectionPoint.x(),
                                   intersectionPoint.y(),
-                                  3,
+                                  self.parameters['radius'],
                                   self.circlePen,
                                   self.circleBrush)
                 self.scene.addItem(point)
@@ -507,7 +503,8 @@ class MarkupDialog(QDialog):
         """
         items = self.scene.itemsDict()
         pos = (items['A'].pos() + items['Y'].pos()) / 2
-        point = PointItem(pos.x(), pos.y(), 3, self.circlePen,
+        point = PointItem(pos.x(), pos.y(), self.parameters['radius'],
+                          self.circlePen,
                           self.circleBrush, items['XY'])
         self.updatePoint(point, 'C')
 
@@ -524,7 +521,8 @@ class MarkupDialog(QDialog):
         inter_type, intersectionPoint = fh.intersects(perpendicular)
         if inter_type:
             point = PointItem(intersectionPoint.x(), intersectionPoint.y(),
-                              3, self.circlePen, self.circleBrush, items['FH'])
+                              self.parameters['radius'], self.circlePen,
+                              self.circleBrush, items['FH'])
             self.updatePoint(point, 'K')
 
     def plotI(self) -> None:
@@ -539,7 +537,8 @@ class MarkupDialog(QDialog):
         bg = items['BG'].line()
         inter_type, intersectionPoint = bg.intersects(perpendicular)
         if inter_type:
-            point = PointItem(intersectionPoint.x(), intersectionPoint.y(), 3,
+            point = PointItem(intersectionPoint.x(), intersectionPoint.y(),
+                              self.parameters['radius'],
                               self.circlePen, self.circleBrush, items['BG'])
             self.updatePoint(point, 'I')
 

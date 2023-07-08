@@ -29,9 +29,12 @@ class MainWindow(QMainWindow):
         'chijin': .0,
         'w': .0,
         'dpmm': 0,
+        'radius': 3.,
+        'line_width': 1.,
     }
     LINE_Z_VALUE: int = 1
     POINT_Z_VALUE: int = 2
+    INCHES_IN_METER: float = 39.3701
 
     def __init__(self) -> None:
         super(MainWindow, self).__init__()
@@ -61,6 +64,25 @@ class MainWindow(QMainWindow):
         self.ui.actionSaveRight.triggered.connect(self.saveRightScene)
         self.ui.actionSaveProject.triggered.connect(self.saveProject)
         self.ui.actionOpen.triggered.connect(self.loadProject)
+
+    def radius(self, width: int, height: int, dpm: int) -> float:
+        """
+        Calculate points radius dependent on image resolution.
+
+        Parameters
+        ----------
+        width : int
+            Image width in pixels.
+        height : int
+            Image height in pixels.
+        dpm : int
+            Image dots per meter.
+
+        Returns
+        -------
+        radius : float
+        """
+        return min(width, height) / (dpm / self.INCHES_IN_METER)
 
     def loadImage(self) -> QPixmap:
         """
@@ -109,7 +131,11 @@ class MainWindow(QMainWindow):
         scene.addPixmap(pixmap)
         view.setScene(scene)
         view.scaleScene()
-        parameters['dpmm'] = pixmap.toImage().dotsPerMeterX() / 1000
+        dpm = pixmap.toImage().dotsPerMeterX()
+        parameters['dpmm'] = dpm / 1000
+        parameters['radius'] = self.radius(pixmap.width(), pixmap.height(),
+                                           dpm)
+        parameters['line_width'] = parameters['radius'] / 3
 
     @Slot()
     def loadLeftImage(self) -> None:
@@ -122,7 +148,7 @@ class MainWindow(QMainWindow):
         self.leftPixmap = self.loadImage()
         if self.leftPixmap is None:
             return
-        self.leftScene = InteractiveScene()
+        self.leftScene = InteractiveScene(radius=self.leftParameters['radius'])
         self.leftParameters = self.PARAMETERS.copy()
         self.setupView(self.leftPixmap,
                        self.leftScene,
@@ -141,7 +167,8 @@ class MainWindow(QMainWindow):
         self.rightPixmap = self.loadImage()
         if self.rightPixmap is None:
             return
-        self.rightScene = InteractiveScene()
+        self.rightScene = InteractiveScene(
+            radius=self.rightParameters['radius'])
         self.rightParameters = self.PARAMETERS.copy()
         self.setupView(self.rightPixmap,
                        self.rightScene,
@@ -152,14 +179,14 @@ class MainWindow(QMainWindow):
     @Slot()
     def callLeftMarkupDialog(self) -> None:
         """Call markup dialog for the left foot"""
-        dialog = MarkupDialog(self, self.leftScene, self.leftParameters)
+        dialog = MarkupDialog(self.leftScene, self.leftParameters, self)
         dialog.markupDone.connect(self.updateLeftScene)
         dialog.show()
 
     @Slot()
     def callRightMarkupDialog(self) -> None:
         """Call markup dialog for the right foot"""
-        dialog = MarkupDialog(self, self.rightScene, self.rightParameters)
+        dialog = MarkupDialog(self.rightScene, self.rightParameters, self)
         dialog.markupDone.connect(self.updateRightScene)
         dialog.show()
 
@@ -394,13 +421,18 @@ class MainWindow(QMainWindow):
                 with ZipFile(fileName, 'r') as loadfile:
                     # reseting environment
                     self.newProject()
+                    # adding parameters
+                    items_dict = json.loads(loadfile.read('items.json'))
+                    self.leftParameters = items_dict['left']['parameters']
+                    self.rightParameters = items_dict['right']['parameters']
                     # loading left pixmap from png
                     try:
                         self.leftPixmap = QPixmap()
                         self.leftPixmap.loadFromData(loadfile.read('left.png'))
                         self.leftScene = InteractiveScene(
                             self.leftPixmap.width(),
-                            self.leftPixmap.height())
+                            self.leftPixmap.height(),
+                            radius=self.leftParameters['radius'])
                         self.leftScene.addPixmap(self.leftPixmap)
                         self.ui.leftView.setScene(self.leftScene)
                         self.enableLeftMarkup(True)
@@ -413,33 +445,33 @@ class MainWindow(QMainWindow):
                             loadfile.read('right.png'))
                         self.rightScene = InteractiveScene(
                             self.rightPixmap.width(),
-                            self.rightPixmap.height())
+                            self.rightPixmap.height(),
+                            radius=self.rightParameters['radius'])
                         self.rightScene.addPixmap(self.rightPixmap)
                         self.ui.rightView.setScene(self.rightScene)
                         self.enableRightMarkup(True)
                     except KeyError:
                         pass
-                    items_dict = json.loads(loadfile.read('items.json'))
                     # adding points
                     self.loadPoints(self.leftScene,
-                                    items_dict['left']['points'])
+                                    items_dict['left']['points'],
+                                    self.leftParameters['radius'])
                     self.loadPoints(self.rightScene,
-                                    items_dict['right']['points'])
+                                    items_dict['right']['points'],
+                                    self.rightParameters['radius'])
                     # adding lines
                     linePen = QPen()
                     linePen.setColor(Qt.GlobalColor.red)
-                    linePen.setWidth(1)
+                    linePen.setWidthF(self.leftParameters['line_width'])
                     self.loadLines(self.leftScene,
                                    items_dict['left']['points'],
                                    items_dict['left']['lines'],
                                    linePen)
+                    linePen.setWidthF(self.rightParameters['line_width'])
                     self.loadLines(self.rightScene,
                                    items_dict['right']['points'],
                                    items_dict['right']['lines'],
                                    linePen)
-                    # adding parameters
-                    self.leftParameters = items_dict['left']['parameters']
-                    self.rightParameters = items_dict['right']['parameters']
             except BadZipFile:
                 box = QMessageBox(QMessageBox.Icon.Warning,
                                   'Ошибка загрузки',
@@ -448,7 +480,8 @@ class MainWindow(QMainWindow):
                 box.show()
 
     def loadPoints(self, scene: type[QGraphicsScene],
-                   points: dict[str, tuple[float, float]]) -> None:
+                   points: dict[str, tuple[float, float]],
+                   radius: float = 3) -> None:
         """
         Add points from dictionary to the scene.
 
@@ -461,7 +494,7 @@ class MainWindow(QMainWindow):
             Must be like: {'point_name': (x, y), ...}.
         """
         for name, pos in points.items():
-            point = scene.addPoint(pos[0], pos[1], 3)
+            point = scene.addPoint(pos[0], pos[1], radius)
             point.setToolTip(name)
             point.setZValue(self.POINT_Z_VALUE)
 

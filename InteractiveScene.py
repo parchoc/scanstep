@@ -97,7 +97,7 @@ class InteractiveScene(QGraphicsScene):
 
     def __init__(self, width: int = 100, height: int = 100,
                  parent: QObject | None = None, pen: QPen | None = None,
-                 brush: QBrush | None = None) -> None:
+                 brush: QBrush | None = None, radius: float = 3.0) -> None:
         super().__init__(0, 0, width, height, parent)
         if pen:
             self.circlePen = pen
@@ -108,13 +108,14 @@ class InteractiveScene(QGraphicsScene):
             self.circleBrush = brush
         else:
             self.circleBrush = QBrush(Qt.GlobalColor.red)
+        self.radius = radius
 
     def mousePressEvent(self, event) -> None:
         """Add PointItem to the scene by click coordinates."""
-        self.addPoint(event.scenePos().x(), event.scenePos().y(), 3)
+        self.addPoint(event.scenePos().x(), event.scenePos().y(), self.radius)
         event.accept()
 
-    def addPoint(self, x: float, y: float, radius: float,
+    def addPoint(self, x: float, y: float, radius: float = 3.0,
                  pen: QPen | None = None,
                  brush: QBrush | None = None) -> PointItem:
         """
@@ -138,10 +139,10 @@ class InteractiveScene(QGraphicsScene):
         item : PointItem
             Created item.
         """
-        if pen and brush:
-            item = PointItem(x, y, radius, pen, brush)
-        else:
-            item = PointItem(x, y, radius, self.circlePen, self.circleBrush)
+        pen_ = pen if pen else self.circlePen
+        brush_ = brush if brush else self.circleBrush
+        radius_ = radius if radius else self.radius
+        item = PointItem(x, y, radius_, pen_, brush_)
         self.addItem(item)
         self.pointAdded.emit(item)
         return item
