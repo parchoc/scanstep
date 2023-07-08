@@ -5,10 +5,11 @@ from zipfile import BadZipFile, ZipFile, ZipInfo
 
 from PySide6.QtCore import QBuffer, QByteArray, QIODevice, Qt, Slot
 from PySide6.QtGui import QImage, QPainter, QPen, QPixmap
-from PySide6.QtWidgets import (QApplication, QFileDialog, QGraphicsScene,
-                               QGraphicsView, QMainWindow, QMessageBox)
+from PySide6.QtWidgets import (QApplication, QFileDialog, QGraphicsLineItem,
+                               QGraphicsScene, QGraphicsView, QMainWindow,
+                               QMessageBox)
 
-from InteractiveScene import InteractiveScene
+from InteractiveScene import InteractiveScene, PointItem
 from markupdialog import MarkupDialog
 from parametersdialog import ParametersDialog
 from ui_mainwindow import Ui_MainWindow
@@ -17,7 +18,7 @@ from ui_mainwindow import Ui_MainWindow
 class MainWindow(QMainWindow):
     """Main window form widget."""
 
-    PARAMETERS = {
+    PARAMETERS: dict[str, float] = {
         'length': .0,
         'width_foot': .0,
         'width_heel': .0,
@@ -29,6 +30,8 @@ class MainWindow(QMainWindow):
         'w': .0,
         'dpmm': 0,
     }
+    LINE_Z_VALUE: int = 1
+    POINT_Z_VALUE: int = 2
 
     def __init__(self) -> None:
         super(MainWindow, self).__init__()
@@ -344,11 +347,11 @@ class MainWindow(QMainWindow):
         }
         for item in scene.items():
             # PointItem
-            if item.type() == 65537:
+            if item.type() == PointItem.Type:
                 save_dict['points'][item.toolTip()] = (item.pos().x(),
                                                        item.pos().y())
             # QGraphicsLineItem
-            elif item.type() == 6:
+            elif item.type() == QGraphicsLineItem().type():
                 save_dict['lines'].append(item.toolTip())
         return save_dict
 
@@ -460,7 +463,7 @@ class MainWindow(QMainWindow):
         for name, pos in points.items():
             point = scene.addPoint(pos[0], pos[1], 3)
             point.setToolTip(name)
-            point.setZValue(2)
+            point.setZValue(self.POINT_Z_VALUE)
 
     def loadLines(self, scene: type[QGraphicsScene],
                   points: dict[str, tuple[float, float]], lines: list[str],
@@ -489,7 +492,7 @@ class MainWindow(QMainWindow):
                 points[line[1]][1],
                 pen)
             item.setToolTip(line)
-            item.setZValue(1)
+            item.setZValue(self.LINE_Z_VALUE)
 
     def enableLeftMarkup(self, enable: bool) -> None:
         """

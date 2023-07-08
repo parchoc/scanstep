@@ -28,6 +28,8 @@ class PointItem(QGraphicsEllipseItem):
         Parent item for the circle.
     """
 
+    Type = QGraphicsItem.UserType + 1
+
     def __init__(self, x: float, y: float, radius: float, pen: QPen = None,
                  brush: QBrush = None, parent: QGraphicsItem = None) -> None:
         super().__init__(0, 0, radius*2, radius*2, parent)
@@ -70,7 +72,7 @@ class PointItem(QGraphicsEllipseItem):
         return super().y() + self.radius
 
     def type(self) -> int:
-        return 65537
+        return self.Type
 
 
 class InteractiveScene(QGraphicsScene):

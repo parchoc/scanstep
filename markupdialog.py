@@ -1,7 +1,7 @@
 from PySide6.QtCore import QLineF, QPointF, Qt, Signal, Slot
 from PySide6.QtGui import QBrush, QPen, QPixmap
 from PySide6.QtWidgets import (QDialog, QGraphicsItem, QGraphicsLineItem,
-                               QGraphicsScene, QWidget)
+                               QGraphicsPixmapItem, QGraphicsScene, QWidget)
 
 import res
 from InteractiveScene import InteractiveScene, PointItem
@@ -82,6 +82,8 @@ class MarkupDialog(QDialog):
     """
 
     markupDone = Signal(QGraphicsScene, dict)
+    LINE_Z_VALUE: int = 1
+    POINT_Z_VALUE: int = 2
 
     def __init__(self, parent: type[QWidget] | None = None,
                  scene: type[QGraphicsScene] | None = None,
@@ -111,17 +113,17 @@ class MarkupDialog(QDialog):
         for item in scene.items():
             # adding background image from initial scene
             name = item.toolTip()
-            if item.type() == 7:
+            if item.type() == QGraphicsPixmapItem().type():
                 self.scene.addPixmap(item.pixmap())
             # adding point items from initial scene
-            if item.type() == 65537:
+            if item.type() == PointItem.Type:
                 items[name] = self.scene.addPoint(item.x(), item.y(), 3)
-                items[name].setZValue(2)
+                items[name].setZValue(self.POINT_Z_VALUE)
                 items[name].setToolTip(name)
             # adding lines
-            if item.type() == 6:
+            if item.type() == QGraphicsLineItem().type():
                 items[name] = self.scene.addLine(item.line(), self.linePen)
-                items[name].setZValue(1)
+                items[name].setZValue(self.LINE_Z_VALUE)
                 items[name].setToolTip(name)
         for point, line in PARENTS.items():
             if point in items and line in items:
@@ -221,7 +223,7 @@ class MarkupDialog(QDialog):
             self.scene.removeItem(items[name])
         # add new point to dict
         point.setToolTip(name)
-        point.setZValue(2)
+        point.setZValue(self.POINT_Z_VALUE)
 
     @Slot(str)
     def updateLines(self, updated_point: str) -> None:
@@ -372,7 +374,7 @@ class MarkupDialog(QDialog):
                 items[line[1]].y(),
                 self.linePen)
         items[line].setToolTip(line)
-        items[line].setZValue(1)
+        items[line].setZValue(self.LINE_Z_VALUE)
 
     def perpendicularTo(self, point: PointItem, line: QLineF) -> QLineF:
         """
