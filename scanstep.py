@@ -34,7 +34,7 @@ class MainWindow(QMainWindow):
     }
     LINE_Z_VALUE: int = 1
     POINT_Z_VALUE: int = 2
-    INCHES_IN_METER: float = 39.3701
+    RADIUS_COEFFICIENT: float = .01
 
     def __init__(self) -> None:
         super(MainWindow, self).__init__()
@@ -65,9 +65,9 @@ class MainWindow(QMainWindow):
         self.ui.actionSaveProject.triggered.connect(self.saveProject)
         self.ui.actionOpen.triggered.connect(self.loadProject)
 
-    def radius(self, width: int, height: int, dpm: int) -> float:
+    def radius(self, width: int, height: int) -> float:
         """
-        Calculate points radius dependent on image resolution.
+        Calculate points radius dependent on image size.
 
         Parameters
         ----------
@@ -75,14 +75,12 @@ class MainWindow(QMainWindow):
             Image width in pixels.
         height : int
             Image height in pixels.
-        dpm : int
-            Image dots per meter.
 
         Returns
         -------
         radius : float
         """
-        return min(width, height) / (dpm / self.INCHES_IN_METER)
+        return (width + height) / 2 * self.RADIUS_COEFFICIENT
 
     def loadImage(self) -> QPixmap:
         """
@@ -133,8 +131,7 @@ class MainWindow(QMainWindow):
         view.scaleScene()
         dpm = pixmap.toImage().dotsPerMeterX()
         parameters['dpmm'] = dpm / 1000
-        parameters['radius'] = self.radius(pixmap.width(), pixmap.height(),
-                                           dpm)
+        parameters['radius'] = self.radius(pixmap.width(), pixmap.height())
         parameters['line_width'] = parameters['radius'] / 3
 
     @Slot()
