@@ -303,11 +303,11 @@ class MarkupDialog(QDialog):
         # foot width
         if (updated_point in {'H', 'G'}
                 and len({'H', 'G'}.intersection(items)) == 2):
-            self.parameters['width_foot'] = self.widthFoot(items['GH'].line())
+            self.parameters['width_foot'] = self.width_mm(items['GH'].line())
         # heel width
         if (updated_point in {'B', 'F'}
                 and len({'B', 'F'}.intersection(items)) == 2):
-            self.parameters['width_heel'] = self.widthFoot(items['BF'].line())
+            self.parameters['width_heel'] = self.width_mm(items['BF'].line())
         # angle alpha(BG, GL)
         if (updated_point in {'B', 'G', 'L'}
                 and len({'B', 'G', 'L'}.intersection(items)) == 3):
@@ -412,7 +412,7 @@ class MarkupDialog(QDialog):
         # checking which line is longer
         if XY.length() > items["YZ"].line().length():
             # if XY longer than accept it as the length
-            length = XY.length()
+            length = XY
             # remove perpendicular if it exists
             if 'WZ' in items:
                 self.scene.removeItem(items['WZ'])
@@ -437,12 +437,12 @@ class MarkupDialog(QDialog):
                 # adding perpendicular line to the scene
                 self.updateLines('W')
                 items = self.scene.itemsDict()
-                length = items['WY'].line().length()
+                length = items['WY'].line()
             else:
-                length = XY.length()
-        return length / self.parameters['dpmm']
+                length = XY
+        return self.width_mm(length)
 
-    def widthFoot(self, line: QLineF) -> float:
+    def width_mm(self, line: QLineF) -> float:
         """
         Convert line length from pixels to mm.
 
