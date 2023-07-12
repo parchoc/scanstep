@@ -1,3 +1,5 @@
+from typing import Callable
+
 from PySide6.QtCore import QLineF, QPointF, Qt, Signal, Slot
 from PySide6.QtGui import QBrush, QPen, QPixmap
 from PySide6.QtWidgets import (QDialog, QGraphicsItem, QGraphicsLineItem,
@@ -66,6 +68,48 @@ PARAMETERS_MESSAGE = '''Длина стопы: {length:.2f}
 Коэффициент W: {w:.2f}'''
 
 
+class Parameter:
+    """
+    Class for foot parameter dependencies and computatian function.
+
+    Attributes
+    ----------
+    points : set
+        Points, the change of which leads to the recalculation
+        of the parameter.
+    exist : set
+        Required for calculation points.
+    func : Callable
+        Parameter calculation function.
+    """
+
+    def __init__(self, points: set, requirements: set,
+                 func: Callable[[dict], float]) -> None:
+        self.points = points
+        self.requirements = requirements
+        self.func = func
+
+    def check(self, point: str, items: dict[str, type[QGraphicsItem]]) -> bool:
+        """
+        Check if changed `point` in `points` and all required points exist.
+
+        Parameters
+        ----------
+        point : str
+            Name of changed point.
+        items :  dict
+            Dictionary with scene items and they names {'name': item}.
+
+        Returns
+        -------
+        bool
+            True if `point` in `points` and all required points in `items`.
+        """
+        return (point in self.points
+                and len(self.requirements.intersection(items))
+                == len(self.requirements))
+
+
 class MarkupDialog(QDialog):
     """
     Markup dialog widget for foot markup.
@@ -91,6 +135,40 @@ class MarkupDialog(QDialog):
         super(MarkupDialog, self).__init__(parent)
         self.ui = Ui_MarkupDialog()
         self.ui.setupUi(self)
+        self.PARAMETERS = {
+            # length
+            'length': Parameter({'Y', 'X', 'Z'}, {'Y', 'X', 'Z'},
+                                self.lengthFoot),
+            # plot C
+            'C': Parameter({'Y', 'A'}, {'Y', 'A'}, self.plotC),
+            # remove IK if one of dependent points is relocated
+            'rm_IK': Parameter({'X', 'A', 'Y'}, {'IK', }, self.removeIK),
+            # plot I
+            'I': Parameter({'Y', 'A', "B", 'G'}, {'C', "B", 'G'}, self.plotI),
+            # plot K
+            'K': Parameter({'Y', 'A', "F", 'H'}, {'C', "F", 'H'}, self.plotK),
+            # plot IK
+            'IK': Parameter({'Y', 'A', "F", 'H', 'B', 'G'}, {'I', "K"},
+                            self.plotIK),
+            # foot width HG
+            'width_foot': Parameter({'H', 'G'}, {'H', 'G'}, self.footWidth),
+            # heel width BF
+            'width_heel': Parameter({'B', 'F'}, {'B', 'F'}, self.heelWidth),
+            # angle alpha(BG, GL)
+            'alpha': Parameter({'B', 'G', 'L'}, {'B', 'G', 'L'}, self.alpha),
+            # angle beta(HM, FH)
+            'beta': Parameter({'H', 'M', 'F'}, {'H', 'M', 'F'}, self.beta),
+            # angle gamma(BG, FH)
+            'gamma': Parameter({'B', 'G', 'F', 'H'}, {'B', 'G', 'F', 'H'},
+                               self.gamma),
+            # angle clark(GN, BG)
+            'clark': Parameter({'G', 'N', 'B'}, {'G', 'N', 'B'}, self.clark),
+            # w = length/foot width
+            'w': Parameter({'Y', "X", "Z", 'H', 'G'},
+                           {'Y', "X", "Z", 'H', 'G'}, self.w),
+            # chijin = DE/EI
+            'chijin': Parameter({'D', "E"}, {'D', "E", 'I'}, self.chijin),
+        }
         self.scene = InteractiveScene(scene.width(), scene.height(),
                                       radius=parameters['radius'])
         self.circlePen = QPen()
@@ -268,79 +346,13 @@ class MarkupDialog(QDialog):
         items = self.scene.itemsDict()
         # check if all points for computetion exist and
         # related point has been modified
-        # length
-        if (updated_point in {'Y', "X", "Z"}
-                and len({'Y', "X", "Z"}.intersection(items)) == 3):
-            self.parameters['length'] = self.lengthFoot()
-        # plot C
-        if (updated_point in {'Y', "A"}
-                and len({'Y', "A"}.intersection(items)) == 2):
-            self.plotC()
-            items = self.scene.itemsDict()
-        # remove IK if one of dependent points is relocated
-        if updated_point in {'X', 'A', 'Y'} and 'IK' in items:
-            self.scene.removeItem(items['I'])
-            self.scene.removeItem(items['K'])
-            self.scene.removeItem(items['IK'])
-            del items['I']
-            del items['K']
-            del items['IK']
-        # plot I
-        if (updated_point in {'Y', 'A', "B", 'G'}
-                and len({'C', "B", 'G'}.intersection(items)) == 3):
-            self.plotI()
-            items = self.scene.itemsDict()
-        # plot K
-        if (updated_point in {'Y', 'A', "F", 'H'}
-                and len({'C', "F", 'H'}.intersection(items)) == 3):
-            self.plotK()
-            items = self.scene.itemsDict()
-        # plot IK
-        if (updated_point in {'Y', 'A', "F", 'H', 'B', 'G'}
-                and len({'I', "K"}.intersection(items)) == 2):
-            self.addLine('IK')
-            items = self.scene.itemsDict()
-        # foot width
-        if (updated_point in {'H', 'G'}
-                and len({'H', 'G'}.intersection(items)) == 2):
-            self.parameters['width_foot'] = self.width_mm(items['GH'].line())
-        # heel width
-        if (updated_point in {'B', 'F'}
-                and len({'B', 'F'}.intersection(items)) == 2):
-            self.parameters['width_heel'] = self.width_mm(items['BF'].line())
-        # angle alpha(BG, GL)
-        if (updated_point in {'B', 'G', 'L'}
-                and len({'B', 'G', 'L'}.intersection(items)) == 3):
-            self.parameters['alpha'] = self.angle(items['BG'].line(),
-                                                  items['GL'].line())
-        # angle beta(HM, FH)
-        if (updated_point in {'H', 'M', 'F'}
-                and len({'H', 'M', 'F'}.intersection(items)) == 3):
-            self.parameters['beta'] = self.angle(items['HM'].line(),
-                                                 items['FH'].line())
-        # angle gamma(BG, FH)
-        if (updated_point in {'B', 'G', 'F', 'H'}
-                and len({'B', 'G', 'F', 'H'}.intersection(items)) == 4):
-            self.parameters['gamma'] = self.angle(items['BG'].line(),
-                                                  items['FH'].line())
-        # angle clark(GN, BG)
-        if (updated_point in {'G', 'N', 'B'}
-                and len({'G', 'N', 'B'}.intersection(items)) == 3):
-            gb = QLineF(
-                items['G'].pos(),
-                items['B'].pos()
-            )
-            self.parameters['clark'] = self.angle(items['GN'].line(), gb)
-        # w = length/foot width
-        if (updated_point in {'Y', "X", "Z", 'H', 'G'}
-                and len({'Y', "X", "Z", 'H', 'G'}.intersection(items)) == 5):
-            self.parameters['w'] = self.w()
-        # chijin = DE/EI
-        if (updated_point in {'D', "E"}
-                and len({'D', "E", 'I'}.intersection(items)) == 3):
-            length_DE = QLineF(items['D'].pos(), items['E'].pos()).length()
-            length_EI = QLineF(items['E'].pos(), items['I'].pos()).length()
-            self.parameters['chijin'] = length_DE / length_EI
+        for key, parameter in self.PARAMETERS.items():
+            if parameter.check(updated_point, items):
+                result = parameter.func(items)
+                # check if was computed foot parameter
+                if key in self.parameters:
+                    self.parameters[key] = result
+                items = self.scene.itemsDict()
 
     @Slot()
     def updateParametersDisplay(self) -> None:
@@ -393,7 +405,7 @@ class MarkupDialog(QDialog):
         perpendicular.setAngle(angle)
         return perpendicular
 
-    def lengthFoot(self) -> float:
+    def lengthFoot(self, items: dict[str, type[QGraphicsItem]]) -> float:
         """
         Compute foot length.
 
@@ -402,12 +414,16 @@ class MarkupDialog(QDialog):
         W and WY accepted as foot length. Foot length converted from
         pixels to mm by divading on the image dpmm value.
 
+        Parameters
+        ----------
+        items :  dict
+            Dictionary with scene items and they names {'name': item}.
+
         Returns
         -------
         length : float
             Foot length in mm.
         """
-        items = self.scene.itemsDict()
         XY = items['XY'].line()
         # checking which line is longer
         if XY.length() > items["YZ"].line().length():
@@ -482,7 +498,7 @@ class MarkupDialog(QDialog):
         angle = line_a.angleTo(line_b)
         return min(angle, 360 - angle)
 
-    def w(self) -> float:
+    def w(self, items=None) -> float:
         """
         Compute w coefficient.
 
@@ -495,27 +511,35 @@ class MarkupDialog(QDialog):
         """
         return self.parameters['length'] / self.parameters['width_foot']
 
-    def plotC(self) -> None:
+    def plotC(self, items: dict[str, type[QGraphicsItem]]) -> None:
         """
         Add C point to the scene.
 
         С point is located in the middle of the AY line.
+
+        Parameters
+        ----------
+        items :  dict
+            Dictionary with scene items and they names {'name': item}.
         """
-        items = self.scene.itemsDict()
         pos = (items['A'].pos() + items['Y'].pos()) / 2
         point = PointItem(pos.x(), pos.y(), self.parameters['radius'],
                           self.circlePen,
                           self.circleBrush, items['XY'])
         self.updatePoint(point, 'C')
 
-    def plotK(self) -> None:
+    def plotK(self, items: dict[str, type[QGraphicsItem]]) -> None:
         """
         Add K point to the scene.
 
         K point is located on the intersection between perpendicular from C to
         HF.
+
+        Parameters
+        ----------
+        items :  dict
+            Dictionary with scene items and they names {'name': item}.
         """
-        items = self.scene.itemsDict()
         perpendicular = self.perpendicularTo(items['C'], items['XY'].line())
         fh = items['FH'].line()
         inter_type, intersectionPoint = fh.intersects(perpendicular)
@@ -525,14 +549,18 @@ class MarkupDialog(QDialog):
                               self.circleBrush, items['FH'])
             self.updatePoint(point, 'K')
 
-    def plotI(self) -> None:
+    def plotI(self, items: dict[str, type[QGraphicsItem]]) -> None:
         """
         Add I point to the scene.
 
         I point is located on the intersection between perpendicular from C to
         BG.
+
+        Parameters
+        ----------
+        items :  dict
+            Dictionary with scene items and they names {'name': item}.
         """
-        items = self.scene.itemsDict()
         perpendicular = self.perpendicularTo(items['C'], items['XY'].line())
         bg = items['BG'].line()
         inter_type, intersectionPoint = bg.intersects(perpendicular)
@@ -541,6 +569,140 @@ class MarkupDialog(QDialog):
                               self.parameters['radius'],
                               self.circlePen, self.circleBrush, items['BG'])
             self.updatePoint(point, 'I')
+
+    def removeIK(self, items: dict[str, type[QGraphicsItem]]) -> None:
+        """
+        Remove IK line and corresponding points.
+
+        Parameters
+        ----------
+        items :  dict
+            Dictionary with scene items and they names {'name': item}.
+        """
+        self.scene.removeItem(items['I'])
+        self.scene.removeItem(items['K'])
+        self.scene.removeItem(items['IK'])
+
+    def plotIK(self, items=None) -> None:
+        """Plot IK line. Require I and K points."""
+        self.addLine('IK')
+
+    def footWidth(self, items: dict[str, type[QGraphicsItem]]) -> float:
+        """
+        Calculate foot width. Require G and H points.
+
+        Parameters
+        ----------
+        items :  dict
+            Dictionary with scene items and they names {'name': item}.
+
+        Rerutns
+        -------
+        float
+            Foot width in mm.
+        """
+        return self.width_mm(items['GH'].line())
+
+    def heelWidth(self, items: dict[str, type[QGraphicsItem]]) -> float:
+        """
+        Calculate foot width. Require B and F points.
+
+        Parameters
+        ----------
+        items :  dict
+            Dictionary with scene items and they names {'name': item}.
+
+        Returns
+        -------
+        float
+            Heel width in mm.
+        """
+        return self.width_mm(items['BF'].line())
+
+    def alpha(self, items: dict[str, type[QGraphicsItem]]) -> float:
+        """
+        Calculate alpha angle between BG and GL lines.
+
+        Parameters
+        ----------
+        items :  dict
+            Dictionary with scene items and they names {'name': item}.
+
+        Returns
+        -------
+        float
+            Angle in degrees.
+        """
+        return self.angle(items['BG'].line(), items['GL'].line())
+
+    def beta(self, items: dict[str, type[QGraphicsItem]]) -> float:
+        """
+        Calculate beta angle between HM and FH lines.
+
+        Parameters
+        ----------
+        items :  dict
+            Dictionary with scene items and they names {'name': item}.
+
+        Returns
+        -------
+        float
+            Angle in degrees.
+        """
+        return self.angle(items['HM'].line(), items['FH'].line())
+
+    def gamma(self, items: dict[str, type[QGraphicsItem]]) -> float:
+        """
+        Calculate gamma angle between BG and FH lines.
+
+        Parameters
+        ----------
+        items :  dict
+            Dictionary with scene items and they names {'name': item}.
+
+        Returns
+        -------
+        float
+            Angle in degrees.
+        """
+        return self.angle(items['BG'].line(), items['FH'].line())
+
+    def clark(self, items: dict[str, type[QGraphicsItem]]) -> float:
+        """
+        Calculate clark angle between GB and GN lines.
+
+        Parameters
+        ----------
+        items :  dict
+            Dictionary with scene items and they names {'name': item}.
+
+        Returns
+        -------
+        float
+            Angle in degrees.
+        """
+        gb = QLineF(
+                items['G'].pos(),
+                items['B'].pos()
+        )
+        return self.angle(items['GN'].line(), gb)
+
+    def chijin(self, items: dict[str, type[QGraphicsItem]]) -> float:
+        """
+        Calculate Chijin coefficient as DE / EI.
+
+        Parameters
+        ----------
+        items :  dict
+            Dictionary with scene items and they names {'name': item}.
+
+        Returns
+        -------
+        float
+        """
+        length_DE = QLineF(items['D'].pos(), items['E'].pos()).length()
+        length_EI = QLineF(items['E'].pos(), items['I'].pos()).length()
+        return length_DE / length_EI
 
     @Slot()
     def hightlightPoint(self) -> None:
