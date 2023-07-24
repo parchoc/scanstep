@@ -77,7 +77,7 @@ class Parameter:
     points : set
         Points, the change of which leads to the recalculation
         of the parameter.
-    exist : set
+    requirements : set
         Required for calculation points.
     func : Callable
         Parameter calculation function.
